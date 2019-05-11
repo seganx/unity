@@ -52,7 +52,7 @@ namespace SeganX
                 position.height = previewHeight;
 
                 var sprite = property.objectReferenceValue.As<Sprite>();
-                if (s_currentTexture != sprite.texture)
+                if (s_currentTextureConverted == null || s_currentTexture != sprite.texture)
                 {
                     s_currentTexture = sprite.texture;
                     s_currentTextureConverted = new Texture2D(s_currentTexture.width, s_currentTexture.height, TextureFormat.ARGB32, false);

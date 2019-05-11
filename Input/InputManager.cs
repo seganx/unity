@@ -76,6 +76,8 @@ namespace SeganX
         public static Button Accelerate = new Button();
         public static Button Boost = new Button();
         public static Button Break = new Button();
+        public static Button Left = new Button();
+        public static Button Right = new Button();
 
         private static Vector3 tmp3D = Vector3.zero;
 

@@ -116,26 +116,6 @@
                     }
 
                     half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
-
-                    if (matId == 1)
-                    {
-                        if (_Reflection1 > 0.01f)
-                        {
-                            fixed3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
-                            res.rgb += cube.rgb * _Reflection1;
-                        }
-                    }
-                    else// if (matId == 2)
-                    {
-                        res.rgb *= 0.7f;
-                        if (_Reflection2 > 0.01f)
-                        {
-                            fixed3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
-                            res.rgb += cube.rgb * _Reflection2;
-                        }
-                    }
-
-
                     half3 lightDir = _WorldSpaceLightPos0.xyz;
                     fixed3 diffuse = _LightColor0.rgb * max(0, dot(i.norm, lightDir));
                     fixed3 ambient = (i.norm.y > 0) ? lerp(unity_AmbientEquator.rgb, unity_AmbientSky.rgb, i.norm.y) : lerp(unity_AmbientEquator.rgb, unity_AmbientGround.rgb, -i.norm.y);
@@ -143,6 +123,14 @@
 
                     if (matId == 1)
                     {
+                        if (_Reflection1 > 0.01f)
+                        {
+                            half3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
+                            float alpha = (cube.r + cube.b + cube.g) / 3.0f;
+                            res.rgb += cube * _Reflection1;
+                            res.a += alpha * _Reflection1;
+                        }
+
                         if (_SpecularAtten1 > 0.01f)
                         {
                             float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
@@ -152,6 +140,15 @@
                     }
                     else// if (matId == 2)
                     {
+                        res.rgb *= 0.7f;
+                        if (_Reflection2 > 0.01f)
+                        {
+                            half3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
+                            float alpha = (cube.r + cube.b + cube.g) / 3.0f;
+                            res.rgb += cube * _Reflection2;
+                            res.a += alpha * _Reflection2;
+                        }
+
                         if (_SpecularAtten2 > 0.01f)
                         {
                             float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower2) * _SpecularAtten2;

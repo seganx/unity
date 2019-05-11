@@ -88,12 +88,12 @@ Shader "SeganX/FX/Reflection/Water"
 					clip(a - 0.01f);
                     fixed2 w = tex2D( _WaterTex, i.uv1).rg;
 
-                    i.uv2.x = (0.5f * i.uv2.x / i.uv2.w) + 0.5f;
+                    i.uv2.x = 0.5f - (0.5f * i.uv2.x / i.uv2.w);
 
 #if SHADER_API_GLES3 || SHADER_API_GLES || SHADER_API_GLCORE
-                    i.uv2.y = 1 - (0.5f * i.uv2.y / i.uv2.w) - 0.5f;
+                    i.uv2.y = (0.5f * i.uv2.y / i.uv2.w) + 0.5f; 
 #else
-                    i.uv2.y = (0.5f * i.uv2.y / i.uv2.w) + 0.5f;
+                    i.uv2.y = 0.5f - (0.5f * i.uv2.y / i.uv2.w);
 #endif
 					fixed4 c = tex2D( _RflctTex, i.uv2 + w * _WaterPower) * _Color;
                     c.rgb *= _ColorStrength;

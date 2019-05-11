@@ -183,6 +183,13 @@ public static class TransformEx
         return self;
     }
 
+    public static Transform SetLocalPositionAndRotation(this Transform self, Vector3 position, Quaternion rotation)
+    {
+        self.localPosition = position;
+        self.localRotation = rotation;
+        return self;
+    }
+
     public static Transform SetParent(this Transform self, Transform parent, bool holdPosition, bool holdScale, bool holdRotation)
     {
         Vector3 lastPos = self.position;
@@ -195,6 +202,12 @@ public static class TransformEx
         if (holdRotation) self.rotation = lastRotation;
         if (holdPosition) self.position = lastPos;
 
+        return self;
+    }
+
+    public static Transform LookDirection(this Transform self, Vector3 forward, Vector3 up)
+    {
+        self.LookAt(self.position + forward, up);
         return self;
     }
 

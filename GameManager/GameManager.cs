@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SeganX
 {
@@ -21,7 +21,7 @@ namespace SeganX
         public System.Action<GameState> OnBackButton = new System.Action<GameState>(x => { });
         public System.Action<GameState> OnOpenState = new System.Action<GameState>(x => { });
 
-        public T OpenState<T>() where T : GameState
+        public T OpenState<T>(bool resetStack = false) where T : GameState
         {
             T state = Resources.Load<T>(prefabPath + typeof(T).Name);
             if (state == null)
@@ -37,6 +37,7 @@ namespace SeganX
                 DelayCall(delay + 0.1f, () => Resources.UnloadUnusedAssets());
             }
 
+            if (resetStack) stateStack.Clear();
             stateStack.Insert(0, typeof(T));
             currentState = Instantiate<GameState>(state);
             currentState.name = state.name;
@@ -109,16 +110,25 @@ namespace SeganX
 
         public GameManager Back(GameState gameState)
         {
-            if (ClosePopup(gameState) == false && currentState == gameState)
+            if (ClosePopup(gameState))
+            {
+                OnBackButton(CurrentPopup != null ? CurrentPopup : currentState);
+            }
+            else if (currentState == gameState)
+            {
                 CloseState();
-
-            OnBackButton(CurrentPopup != null ? CurrentPopup : currentState);
+                OnBackButton(CurrentPopup != null ? CurrentPopup : currentState);
+            }
             return this;
         }
 
         private void AttachState(GameState panel)
         {
             if (panel == null) return;
+
+            if (canvas.worldCamera == null)
+                canvas.worldCamera = Camera.main;
+
             if (panel.transform is RectTransform)
             {
                 var panelcanvas = panel.GetComponent<Canvas>();

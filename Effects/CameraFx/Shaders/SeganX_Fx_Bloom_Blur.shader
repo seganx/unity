@@ -45,16 +45,11 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
                 fixed4 c1 = tex2D(_MainTex, i.uv);
-
                 fixed4 c2 = tex2D(_MainTex, i.uv + _Offset.xy);
                 fixed4 c3 = tex2D(_MainTex, i.uv - _Offset.xy);
-            
                 fixed4 c4 = tex2D(_MainTex, i.uv + _Offset.zw);
                 fixed4 c5 = tex2D(_MainTex, i.uv - _Offset.zw);
-
-                //return (c1 * 2 + c2 * 1.5f + c3 * 1.5 + c4 + c5) / 7;
                 return (c1 + c2 + c3 + c4 + c5) / 5;
-                //return (c1 + c2 + c3 ) / 3;
 			}
 			ENDCG
 		}

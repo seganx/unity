@@ -37,9 +37,9 @@ namespace SeganX
         private void DisplayText()
         {
             if (localargs == null)
-                target.SetTextAndWrap(currnetText, autoRtl, false);
+                target.SetTextAndWrap(currnetText, autoRtl, LocalizationService.IsPersian);
             else
-                target.SetTextAndWrap(string.Format(currnetText, localargs), autoRtl, false);
+                target.SetTextAndWrap(string.Format(currnetText, localargs), autoRtl, LocalizationService.IsPersian);
         }
 
         private void CheckSize()

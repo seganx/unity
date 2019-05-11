@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 
 public static class GameObjectEx
@@ -48,6 +49,15 @@ public static class GameObjectEx
         var res = self.GetComponent<T>();
         if (res == null && includeChildren)
             res = self.GetComponentInChildren<T>(includeInactive);
+        return res;
+    }
+
+    public static List<T> GetComponents<T>(this Component self, bool includeChildren, bool includeInactive) where T : Component
+    {
+        var res = new List<T>();
+        res.AddRange(self.GetComponents<T>());
+        if (res == null && includeChildren)
+            res.AddRange(self.GetComponentsInChildren<T>(includeInactive));
         return res;
     }
 

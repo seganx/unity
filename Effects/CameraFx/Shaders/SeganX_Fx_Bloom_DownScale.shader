@@ -53,7 +53,8 @@
                 fixed3 c5 = tex2D(_MainTex, i.uv - _Offset.zw).rgb;
                 fixed4 col = 1;
                 col.rgb = (c1 + c2 + c3 + c4 + c5) / 5;
-                col.rgb = pow((col.r + col.g + col.b) / 3, _FilterRange) * _FilterRange * 0.5f;
+
+                col.rgb = col.rgb * col.rgb * pow((col.r + col.g + col.b) / 3, _FilterRange) * _FilterRange * 0.5f;
                 return col;
 			}
 			ENDCG

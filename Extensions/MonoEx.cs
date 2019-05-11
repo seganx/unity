@@ -245,8 +245,11 @@ public static class MonoEx
         return (self == null) ? null : self.Replace('ي', 'ی');
     }
 
-    public static string Persian(this string self)
+    public static string Persian(this string self, bool force = true)
     {
+        if (!force && !self.IsRtl())
+            return self;
+
         return (self == null) ? null : PersianTextShaper.PersianTextShaper.ShapeText(CleanForPersian(self))
             .Replace("‌", "")
             .Replace("‌", "")

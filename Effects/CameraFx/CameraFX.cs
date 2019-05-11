@@ -25,7 +25,7 @@ namespace SeganX.Effects
         {
             get
             {
-                return SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Default);//&& SystemInfo.supportsRenderToCubemap;
+                return SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Default);
             }
         }
 
@@ -157,7 +157,7 @@ namespace SeganX.Effects
             {
                 buffers.Remove(buffer);
                 buffer.Release();
-                DestroyImmediate(buffer);
+                Destroy(buffer);
                 buffer = null;
             }
             return null;
@@ -170,7 +170,7 @@ namespace SeganX.Effects
                 if (buffers[i] != null)
                 {
                     buffers[i].Release();
-                    DestroyImmediate(buffers[i]);
+                    Destroy(buffers[i]);
                 }
                 buffers[i] = null;
             }

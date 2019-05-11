@@ -4,34 +4,15 @@ using UnityEngine;
 
 namespace SeganX
 {
-    public class Core : ScriptableObject
+    public class Core : StaticConfig<Core>
     {
+        #region Classes
         [System.Serializable]
         public class SecurityOptions
         {
             public string cryptokey = string.Empty;
             public string salt = string.Empty;
             public bool hashSalt = true;
-        }
-
-        public class Data
-        {
-            public string baseDeviceId;
-            public string deviceId;
-            public string saltHash;
-            public byte[] cryptoKey;
-            public int valueKey = 77777;
-
-            public Data(string key, string salt, bool hashSalt, string testDeviceId)
-            {
-                baseDeviceId = string.IsNullOrEmpty(testDeviceId) ? SystemInfo.deviceUniqueIdentifier : testDeviceId;
-                deviceId = ComputeMD5(baseDeviceId, salt);
-                saltHash = hashSalt ? ComputeMD5(salt, salt) : salt;
-                cryptoKey = System.Text.Encoding.ASCII.GetBytes(key);
-
-                foreach (var s in key)
-                    valueKey += valueKey + s;
-            }
         }
 
 #if UNITY_EDITOR
@@ -66,25 +47,36 @@ namespace SeganX
         }
 #endif
 
-        public SecurityOptions securityOptions;
+        public class Data
+        {
+            public string baseDeviceId;
+            public string deviceId;
+            public string saltHash;
+            public byte[] cryptoKey;
+            public int valueKey = 77777;
+
+            public Data(string key, string salt, bool hashSalt, string testDeviceId)
+            {
+                baseDeviceId = string.IsNullOrEmpty(testDeviceId) ? SystemInfo.deviceUniqueIdentifier : testDeviceId;
+                deviceId = ComputeMD5(baseDeviceId, salt);
+                saltHash = hashSalt ? ComputeMD5(salt, salt) : salt;
+                cryptoKey = System.Text.Encoding.ASCII.GetBytes(key);
+
+                foreach (var s in key)
+                    valueKey += valueKey + s;
+            }
+        }
+        #endregion
+
+        public SecurityOptions securityOptions = new SecurityOptions();
 #if UNITY_EDITOR
-        public AssetBundleBuildOptions assetBundleBuildOptions;
-        public TestDeviceID testDeviceId;
+        public AssetBundleBuildOptions assetBundleBuildOptions = new AssetBundleBuildOptions();
+        public TestDeviceID testDeviceId = new TestDeviceID();
 #endif
-
-#if OFF
-        [Header("Deprecated: Use Security Options")]
-        [System.Obsolete("Use SecurityOptions.cryptokey")]
-        public string cryptokey = string.Empty;
-        [System.Obsolete("Use SecurityOptions.salt")]
-        public string salt = string.Empty;
-        [System.Obsolete("Use SecurityOptions.hashSalt")]
-        public bool hashSalt = false;
-#endif
-
         public Data data = null;
 
-        private void Awake()
+
+        protected override void OnInitialize()
         {
 #if UNITY_EDITOR
             if (testDeviceId.active)
@@ -101,26 +93,12 @@ namespace SeganX
         ////////////////////////////////////////////////////////////
         /// STATIC MEMBERS
         ////////////////////////////////////////////////////////////
-        private static Core instance = null;
-
         public static string BaseDeviceId { get { return Instance.data.baseDeviceId; } }
         public static string DeviceId { get { return Instance.data.deviceId; } }
         public static string Salt { get { return Instance.data.saltHash; } }
         public static byte[] CryptoKey { get { return Instance.data.cryptoKey; } }
         public static int ValueKey { get { return Instance.data.valueKey; } }
 
-        public static Core Instance
-        {
-            get
-            {
-#if UNITY_EDITOR
-                CheckService();
-#endif
-                if (instance == null) instance = Resources.Load<Core>("SeganX");
-                if (instance != null && instance.data == null) instance.Awake();
-                return instance;
-            }
-        }
 
         public static string ComputeMD5(string str, string salt)
         {
@@ -134,23 +112,5 @@ namespace SeganX
 
             return res.ToString();
         }
-
-
-#if UNITY_EDITOR
-        public static void CheckService()
-        {
-            var path = "/Resources/";
-            var fileName = path + "SeganX.asset";
-            if (File.Exists(Application.dataPath + fileName)) return;
-
-            var ioPath = Application.dataPath + path;
-            if (!Directory.Exists(ioPath)) Directory.CreateDirectory(ioPath);
-
-            instance = CreateInstance<Core>();
-            UnityEditor.AssetDatabase.CreateAsset(instance, "Assets" + fileName);
-
-            UnityEditor.AssetDatabase.SaveAssets();
-        }
-#endif
     }
 }

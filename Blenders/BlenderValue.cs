@@ -1,24 +1,23 @@
-﻿namespace SeganX
+﻿using UnityEngine;
+
+namespace SeganX
 {
     public struct BlenderValue
     {
         public float speed;
-        public float value;
+        public float destination;
         public float current;
 
         public void Setup(float initValue)
         {
-            current = value = initValue;
+            current = destination = initValue;
         }            
         
         public bool Update(float deltaTime)
         {
-            if (current != value)
+            if (current != destination)
             {
-                float d = value - current;
-                current += d * speed * deltaTime;
-                if (System.Math.Abs(d) <= deltaTime)
-                    current = value;
+                current = Mathf.Lerp(current, destination, speed * deltaTime);
                 return true;
             }
             else return false;

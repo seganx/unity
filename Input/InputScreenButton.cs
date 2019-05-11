@@ -16,6 +16,8 @@ namespace SeganX
             Accelerate = 2,
             Boost = 3,
             Break = 4,
+            Left = 5,
+            Right = 6,
         }
 
         [Tooltip("Select which component of the input will be changed")]
@@ -38,6 +40,8 @@ namespace SeganX
                 case Type.Accelerate: button = InputManager.Accelerate; break;
                 case Type.Boost: button = InputManager.Boost; break;
                 case Type.Break: button = InputManager.Break; break;
+                case Type.Left: button = InputManager.Left; break;
+                case Type.Right: button = InputManager.Right; break;
             }
 
             pressImage.gameObject.SetActive(false);
