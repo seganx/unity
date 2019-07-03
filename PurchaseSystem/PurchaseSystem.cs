@@ -66,14 +66,9 @@ namespace SeganX
             DontDestroyOnLoad(new GameObject("PurchaseSystem").AddComponent<PurchaseSystem>());
         }
 
-
-
-
-        public static void Initialize(string bazaarKey, string storeUrl, Callback callback = null)
+        public static void Initialize(string bazaarKey, string storeUrl, Callback callback)
         {
             StoreUrl = storeUrl;
-            if (callback == null) return;
-
             if (IsInitialized == false)
             {
                 callbackCaller.Setup(callback);
@@ -104,6 +99,7 @@ namespace SeganX
                     else
                     {
                         Application.OpenURL(StoreUrl);
+                        callback(false, "Bazaar Not Supported!");
                     }
                     break;
 #endif
