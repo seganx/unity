@@ -65,7 +65,6 @@ namespace SeganX
                     Debug.LogError("Can't read file: " + e.Message);
                 }
             }
-            else Debug.LogWarning("File " + path + " not exist!!");
             return res;
         }
 
@@ -108,7 +107,7 @@ namespace SeganX
             SaveData(key + ".seganx", Encrypt(stream.GetBuffer(), Core.CryptoKey));
         }
 
-        public static T Deserialize<T>(string key) where T : new()
+        public static T Deserialize<T>(string key, T defaultValue)
         {
             byte[] data = LoadData(key + ".seganx");
             if (data != null && data.Length > 0)
@@ -117,7 +116,7 @@ namespace SeganX
                 BinaryFormatter fmter = new BinaryFormatter();
                 return (T)fmter.Deserialize(stream);
             }
-            else return new T();
+            else return defaultValue;
         }
 
         public static void ClearData()

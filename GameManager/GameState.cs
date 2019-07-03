@@ -5,7 +5,7 @@
         //  Will be called before destroying this object. return time of closing animation
         public virtual float PreClose()
         {
-            return 0;
+            return UiShowHide.HideAll(transform);
         }
 
         //  will be called whene back button pressed

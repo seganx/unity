@@ -18,10 +18,16 @@ namespace SeganX
             Break = 4,
             Left = 5,
             Right = 6,
+            Horn = 7
         }
+
+        public bool intractable = true;
 
         [Tooltip("Select which component of the input will be changed")]
         public Type type = Type.Jump;
+
+        [Tooltip("Image of the button when it is disabled")]
+        public Image disabledImage = null;
 
         [Tooltip("Image of the button when it is normal")]
         public Image normalImage = null;
@@ -31,7 +37,7 @@ namespace SeganX
 
         private InputManager.Button button = null;
 
-        void Awake()
+        private void Awake()
         {
             switch (type)
             {
@@ -42,20 +48,28 @@ namespace SeganX
                 case Type.Break: button = InputManager.Break; break;
                 case Type.Left: button = InputManager.Left; break;
                 case Type.Right: button = InputManager.Right; break;
+                case Type.Horn: button = InputManager.Horn; break;
             }
 
+            if (disabledImage) disabledImage.gameObject.SetActive(!intractable);
+            normalImage.gameObject.SetActive(intractable);
             pressImage.gameObject.SetActive(false);
         }
 
-        void LateUpdate()
+        private void LateUpdate()
         {
+            if (disabledImage) disabledImage.gameObject.SetActive(!intractable);
+            normalImage.gameObject.SetActive(intractable);
             button.OnLateUpdate();
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            pressImage.gameObject.SetActive(true);
-            button.OnPointerDown();
+            if (intractable)
+            {
+                pressImage.gameObject.SetActive(true);
+                button.OnPointerDown();
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)

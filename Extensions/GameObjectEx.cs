@@ -56,7 +56,7 @@ public static class GameObjectEx
     {
         var res = new List<T>();
         res.AddRange(self.GetComponents<T>());
-        if (res == null && includeChildren)
+        if (includeChildren)
             res.AddRange(self.GetComponentsInChildren<T>(includeInactive));
         return res;
     }
@@ -91,5 +91,12 @@ public static class GameObjectEx
         if (shader == null) return self;
         self.shader = shader;
         return self;
+    }
+
+    public static Material Clone(this Material self)
+    {
+        var res = Object.Instantiate(self);
+        res.name = self.name;
+        return res;
     }
 }

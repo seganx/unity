@@ -1,10 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace SeganX.Console
 {
+    [DefaultExecutionOrder(-1000)]
     public class Logger : MonoBehaviour
     {
         public class LogText
@@ -28,9 +29,8 @@ namespace SeganX.Console
         private List<LogText> textList = new List<LogText>();
         private volatile List<KeyValuePair<string, Color>> threadedList = new List<KeyValuePair<string, Color>>();
 
-        void Awake()
+        private void Awake()
         {
-            instance = this;
             if (SystemInfo.systemMemorySize < 1000)
             {
                 maxTextCount = 500;
@@ -40,12 +40,11 @@ namespace SeganX.Console
             textVisual = scroll.content.GetChild<Text>(0);
             textVisual.text = string.Empty;
             GetComponent<Canvas>().enabled = true;
-            gameObject.SetActive(enable = false);
-            
+
             Application.logMessageReceivedThreaded += HandleLog;
         }
 
-        void HandleLog(string condition, string stacktrace, LogType type)
+        private void HandleLog(string condition, string stacktrace, LogType type)
         {
             if (!Enabled || condition.IsNullOrEmpty()) return;
 
@@ -63,13 +62,14 @@ namespace SeganX.Console
                         threadedList.Add(new KeyValuePair<string, Color>(condition + "\n" + stacktrace, Color.red));
                         break;
 
-                    default: threadedList.Add(new KeyValuePair<string, Color>(condition, Color.white));
+                    default:
+                        threadedList.Add(new KeyValuePair<string, Color>(condition, Color.white));
                         break;
                 }
             }
         }
 
-        void AddToLog(string str, Color color)
+        private void AddToLog(string str, Color color)
         {
             if (str.Length > maxTextLength)
             {
@@ -115,7 +115,7 @@ namespace SeganX.Console
 
         private void Start()
         {
-            AddToLog("Start Version " + Application.version + " on " + Core.DeviceId + " based on " + Core.BaseDeviceId, Color.green);
+            AddToLog("Start Version " + Application.version + " on " + Core.DeviceId + " based on " + Core.BaseDeviceId + " at " + System.DateTime.Now, Color.green);
         }
 
         private void Update()
@@ -158,16 +158,26 @@ namespace SeganX.Console
                 scroll.normalizedPosition = Vector2.zero;
         }
 
+        public void Save()
+        {
+            SaveLog();
+        }
+
         /////////////////////////////////////////////////////////////////////////////
         //  STATICS
         /////////////////////////////////////////////////////////////////////////////
         private static Logger instance = null;
-        private static bool enable = false;
 
         public static bool Enabled
         {
-            get { return enable; }
-            set { instance.gameObject.SetActive(enable = value); }
+            get { return instance != null; }
+            set
+            {
+                if (instance != null && value == false)
+                    Destroy(instance.gameObject);
+                else if (instance == null && value == true)
+                    instance = Resources.Load<Logger>("Console").Clone<Logger>();
+            }
         }
 
         private static float ComputeHeight(List<LogText> list)
@@ -189,7 +199,11 @@ namespace SeganX.Console
                 str += item.visualText + "\n";
             str = str.Replace("\n", "\r\n");
 
-            var filename = Application.temporaryCachePath + "/log" +  System.DateTime.Now.Ticks + ".txt";
+#if UNITY_EDITOR
+            var filename = Application.dataPath + "/../../Documents/log" + System.DateTime.Now.Ticks + ".txt";
+#else
+            var filename = Application.temporaryCachePath + "/log" + System.DateTime.Now.Ticks + ".txt";
+#endif
             System.IO.File.WriteAllText(filename, str);
             Debug.Log("Saved to " + filename);
 

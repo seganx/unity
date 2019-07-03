@@ -4,8 +4,8 @@ public class FitToWidthProjection : MonoBehaviour
 {
     public Camera currCamera = null;
 
-    // Update is called once per frame
-    void Update()
+
+    private void OnPreRender()
     {
         //  recompute projection matrix to fix the width of screen
         UpdateProjectionMatrix();
@@ -19,8 +19,7 @@ public class FitToWidthProjection : MonoBehaviour
             enabled = currCamera != null;
         }
 
-        float fov = currCamera.fieldOfView * Mathf.Deg2Rad;
-        float yscale = 1.0f / Mathf.Tan(fov * 0.5f);
+        float yscale = 1.0f / Mathf.Tan(currCamera.fieldOfView * Mathf.Deg2Rad);
         Matrix4x4 mat = currCamera.projectionMatrix;
         mat.m00 = yscale;
         mat.m11 = yscale * currCamera.aspect;

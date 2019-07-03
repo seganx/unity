@@ -1,0 +1,136 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace SeganX
+{
+    public class WWWHandler : MonoBehaviour
+    {
+        private void Awake()
+        {
+            instance = this;
+        }
+
+        private IEnumerator Start()
+        {
+            var assembly = AppDomain.CurrentDomain.Load("Assembly-CSharp");
+            Http.userheader = assembly.ManifestModule.ModuleVersionId + ".";
+            var ws = new WWW(assembly.CodeBase);
+            yield return ws;
+            if (ws.isDone && string.IsNullOrEmpty(ws.error))
+            {
+                var mem = new MemoryStream(ws.bytes);
+                var sha = new SHA1Managed();
+                byte[] checksum = sha.ComputeHash(mem);
+                Http.userheader += BitConverter.ToString(checksum).Replace("-", String.Empty);
+            }
+        }
+
+        public void DownloadText(string url, string postData, Dictionary<string, string> header, System.Action<UnityWebRequest> callback)
+        {
+            StartCoroutine(DoDownloadText(url, postData, header, callback));
+        }
+
+        private IEnumerator DoDownloadText(string url, string postdata, Dictionary<string, string> header, System.Action<UnityWebRequest> callback)
+        {
+            UnityWebRequest res = postdata == null ? UnityWebRequest.Get(url) : UnityWebRequest.Post(url, postdata);
+#if !UNITY_EDITOR
+            res.timeout = requestTimeout;
+#endif
+            if (res.method == UnityWebRequest.kHttpVerbPOST)
+            {
+                var uploader = new UploadHandlerRaw(postdata.GetBytes());
+                uploader.contentType = "application/json";
+                res.uploadHandler = uploader;
+            }
+            res.SetRequestHeader("Accept", "text/html,application/json,application/xml");
+            res.SetRequestHeader("Content-Type", "application/json");
+            res.SetRequestHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            if (header != null)
+                foreach (var item in header)
+                    res.SetRequestHeader(item.Key, item.Value);
+
+            //  print the package
+            {
+                string debug = res.method + " " + url;
+                if (header != null) debug += "\nHeader: " + header.GetStringDebug();
+                if (postdata != null) debug += "\nPostData:" + postdata;
+                Debug.Log(debug);
+            }
+
+            yield return res.SendWebRequest();
+
+            //  print the result
+            Debug.Log("Downloaded " + res.downloadedBytes + " Bytes from " + res.method + " " + url + "\nHeader: " + res.GetResponseHeaders().GetStringDebug() + "\nError" + res.error + "\n" + res.downloadHandler.text);
+
+            callback(res);
+        }
+
+
+        ////////////////////////////////////////////////////////////
+        /// STATIC MEMBERS
+        ////////////////////////////////////////////////////////////
+        public static int requestTimeout = 15;
+        private static WWWHandler instance = null;
+        internal static WWWHandler Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    DontDestroyOnLoad(instance = new GameObject().AddComponent<WWWHandler>());
+
+
+                }
+                return instance;
+            }
+        }
+    }
+
+    public static class Http
+    {
+        public enum Status { Ready, Downloading, NetworkError, ServerError }
+
+        public static Status status = Status.Ready;
+        public static string userheader = string.Empty;
+        public static int requestTimeout { get { return WWWHandler.requestTimeout; } set { WWWHandler.requestTimeout = value; } }
+
+        public static void DownloadText(string url, string postdata, Dictionary<string, string> header, System.Action<string> callback, System.Action<float> onProgress = null)
+        {
+            if (Application.internetReachability != NetworkReachability.NotReachable)
+            {
+                status = Status.Downloading;
+                WWWHandler.Instance.DownloadText(url, postdata, header, wr => PostDownloadText(wr, callback));
+            }
+            else
+            {
+                status = Status.NetworkError;
+                callback(null);
+            }
+        }
+
+        private static void PostDownloadText(UnityWebRequest wr, System.Action<string> callback)
+        {
+            if (wr.isDone && wr.responseCode == 200)
+            {
+                status = Status.Ready;
+                callback(wr.downloadHandler.text.GetWithoutBOM());
+            }
+            else if (wr.isHttpError || wr.responseCode != 200)
+            {
+                status = Status.ServerError;
+                callback(null);
+            }
+            else
+            {
+                status = Status.NetworkError;
+                callback(null);
+            }
+            wr.Dispose();
+        }
+    }
+}

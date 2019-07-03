@@ -207,6 +207,7 @@ public static class MonoEx
 
     public static string GetWithoutBOM(this string self)
     {
+        if (self.IsNullOrEmpty()) return string.Empty;
         MemoryStream memoryStream = new MemoryStream(self.GetBytes());
         StreamReader streamReader = new StreamReader(memoryStream, true);
         string result = streamReader.ReadToEnd();
@@ -331,6 +332,11 @@ public static class MonoEx
     public static bool HasItem(this System.Array self)
     {
         return self != null && self.Length > 0;
+    }
+
+    public static int LastIndex(this System.Array self)
+    {
+        return self.Length - 1;
     }
 
     public static bool IsNullOrEmpty(this System.Array self)

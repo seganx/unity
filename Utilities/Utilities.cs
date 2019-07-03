@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 using UnityEngine;
 
@@ -77,6 +78,68 @@ namespace SeganX
                 return string.Format(LocalizationService.Get(111012), span.Hours, span.Minutes);
             else
                 return string.Format(LocalizationService.Get(111013), span.Minutes, span.Seconds);
+        }
+
+        public static string TimeToString(float time, int decimals)
+        {
+            int h = (int)time / 3600;
+            int m = ((int)time % 3600) / 60;
+            float s = time % 60;
+            switch (decimals)
+            {
+                case 1: return (h > 0) ? (h.ToString("00") + ":" + m.ToString("00") + ":" + s.ToString("00.0")) : (m.ToString("00") + ":" + s.ToString("00.0"));
+                case 2: return (h > 0) ? (h.ToString("00") + ":" + m.ToString("00") + ":" + s.ToString("00.00")) : (m.ToString("00") + ":" + s.ToString("00.00"));
+                case 3: return (h > 0) ? (h.ToString("00") + ":" + m.ToString("00") + ":" + s.ToString("00.000")) : (m.ToString("00") + ":" + s.ToString("00.000"));
+            }
+            return (h > 0) ? (h.ToString("00") + ":" + m.ToString("00") + ":" + s.ToString("00")) : (m.ToString("00") + ":" + s.ToString("00"));
+        }
+
+        public static string CompressString(string text, string failedReturn)
+        {
+            try
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(text);
+                MemoryStream msi = new MemoryStream(bytes);
+                MemoryStream mso = new MemoryStream();
+                SevenZip.Compression.LZMA.Encoder enc = new SevenZip.Compression.LZMA.Encoder();
+                enc.WriteCoderProperties(mso);
+                mso.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
+                enc.Code(msi, mso, msi.Length, -1, null);
+                var res = Convert.ToBase64String(mso.ToArray());
+                msi.Close(); msi.Dispose();
+                mso.Close(); mso.Dispose();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message + " | " + ex.StackTrace);
+            }
+            return failedReturn;
+        }
+
+        public static string DecompressString(string compressedText, string failedReturn)
+        {
+            if (compressedText.HasContent(10) == false) return failedReturn;
+            try
+            {
+                MemoryStream msi = new MemoryStream(Convert.FromBase64String(compressedText));
+                MemoryStream mso = new MemoryStream();
+                SevenZip.Compression.LZMA.Decoder dec = new SevenZip.Compression.LZMA.Decoder();
+                byte[] props = new byte[5]; msi.Read(props, 0, 5);
+                byte[] length = new byte[4]; msi.Read(length, 0, 4);
+                int len = BitConverter.ToInt32(length, 0);
+                dec.SetDecoderProperties(props);
+                dec.Code(msi, mso, msi.Length, len, null);
+                var res = Encoding.UTF8.GetString(mso.ToArray());
+                msi.Close(); msi.Dispose();
+                mso.Close(); mso.Dispose();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message + " | " + ex.StackTrace);
+            }
+            return failedReturn;
         }
     }
 }

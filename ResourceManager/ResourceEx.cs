@@ -21,14 +21,13 @@ namespace SeganX
 
         protected override void OnInitialize()
         {
-            
+
         }
 
         ///////////////////////////////////////////////////////////////
         /// STATIC MEMBERS
         ///////////////////////////////////////////////////////////////
-        private static char[] splitChars = { '_' };
-        private static ResourceEx m_instance = null;
+        private static char[] splitIncludes = { ' ' };
 
         public static T Load<T>(string path) where T : Object
         {
@@ -43,7 +42,8 @@ namespace SeganX
 
         public static List<File> LoadAll(string dire, string includes)
         {
-            return Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => includes.Contains(y)));
+            var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
+            return Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
         }
 
         public static List<File> LoadAll(string dire, bool subfolders)
@@ -57,6 +57,7 @@ namespace SeganX
             var files = subfolders ? Instance.files.FindAll(x => x.dire.Contains(dire)) : Instance.files.FindAll(x => x.dire == dire);
             if (files.Count == 0) return res;
 
+            files.Sort((x, y) => x.id - y.id);
             foreach (var item in files)
             {
                 var loaded = Resources.Load<T>(item.path);
@@ -69,10 +70,12 @@ namespace SeganX
 
         public static List<T> LoadAll<T>(string dire, string includes) where T : Object
         {
+            var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
             var res = new List<T>();
-            var files = Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => includes.Contains(y)));
+            var files = Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
             if (files.Count == 0) return res;
 
+            files.Sort((x, y) => x.id - y.id);
             foreach (var item in files)
             {
                 var loaded = Resources.Load<T>(item.path);
@@ -91,11 +94,12 @@ namespace SeganX
         {
             var resname = System.IO.Path.GetFileNameWithoutExtension(filepath);
             if (resname.IsNullOrEmpty()) return;
+            char[] splitTags = { '_' };
             var item = new File();
             item.name = resname;
             item.dire = System.IO.Path.GetDirectoryName(filepath) + "/";
             item.path = filepath.ExcludeFileExtention();
-            item.tags.AddRange(item.name.Split(splitChars, System.StringSplitOptions.RemoveEmptyEntries));
+            item.tags.AddRange(item.name.Split(splitTags, System.StringSplitOptions.RemoveEmptyEntries));
             item.id = item.tags.Count > 0 ? item.tags[0].ToInt(-1) : -1;
             if (Instance.justFilesWithId && item.id == -1) return;
             if (Instance.files.Exists(x => x.name == item.name && x.dire == item.dire && x.path == item.path && x.id == item.id)) return;

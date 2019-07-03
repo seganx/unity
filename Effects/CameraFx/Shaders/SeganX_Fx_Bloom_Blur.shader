@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
+        [HideInInspector] _MainTex ("Texture", 2D) = "white" {}
         [HideInInspector] _Offset ("Offset", Vector) = (0,0,0,0)
 	}
 
@@ -49,7 +49,9 @@
                 fixed4 c3 = tex2D(_MainTex, i.uv - _Offset.xy);
                 fixed4 c4 = tex2D(_MainTex, i.uv + _Offset.zw);
                 fixed4 c5 = tex2D(_MainTex, i.uv - _Offset.zw);
-                return (c1 + c2 + c3 + c4 + c5) / 5;
+                //return (c1 * c1.a + c2 * c2.a + c3 * c3.a + c4 * c4.a + c5 * c5.a) / 5;
+                return (c1 + c2 + c3 + c4 + c5) / 4;
+                //return c1;
 			}
 			ENDCG
 		}

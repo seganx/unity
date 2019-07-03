@@ -5,7 +5,7 @@ using UnityEditor;
 namespace SeganX
 {
     [CustomEditor(typeof(Core))]
-    public class CoreEditor : UnityEditor.Editor
+    public class CoreEditor : Editor
     {
         public override void OnInspectorGUI()
         {

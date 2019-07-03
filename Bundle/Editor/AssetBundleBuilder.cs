@@ -1,17 +1,46 @@
-﻿using System.Collections;
+﻿using SeganX;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using SeganX;
 
-public class AssetBundleBuilder
+public class AssetBundleBuilder : StaticConfig<AssetBundleBuilder>
 {
     public class BuildTextureData
     {
         public string path = string.Empty;
         public int maxSize = 256;
+    }
+
+    [System.Serializable]
+    public class BuildOptions
+    {
+        public enum TextureResize : int { FullSize = 1, HalfSize = 2, QuarterSize = 4 }
+        public string folder = "android";
+        public string suffix = string.Empty;
+        public BuildTarget platform = BuildTarget.Android;
+        public TextureResize textureSize = TextureResize.FullSize;
+        public bool encrypt = true;
+        public bool active = true;
+    }
+
+    public string bundlesPath = "Assets/Editor/Bundles";
+    public string outputPath = "AssetBundles";
+    public BuildAssetBundleOptions buildOptions = BuildAssetBundleOptions.None;
+    public BuildOptions[] builds = null;
+
+    protected override void OnInitialize() { }
+
+
+    ////////////////////////////////////////////////////////////
+    /// STATIC MEMBERS
+    ////////////////////////////////////////////////////////////
+    [MenuItem("SeganX/AssetBundles/Build Options")]
+    public static void SelectBuildConfig()
+    {
+        Selection.activeObject = Instance;
     }
 
     [MenuItem("SeganX/AssetBundles/Build from Selection")]
@@ -60,27 +89,27 @@ public class AssetBundleBuilder
 
     public static void BuildAssetBundlesAllTargets(AssetBundleBuild[] builds)
     {
-        foreach (var buildOption in Core.Instance.assetBundleBuildOptions.builds)
+        foreach (var buildOption in Instance.builds)
         {
             if (buildOption.active == false) continue;
 
-            var outputPath = VerifyDirectory(Core.Instance.assetBundleBuildOptions.outputPath, buildOption.folder);
+            var outputPath = VerifyDirectory(Instance.outputPath, buildOption.folder);
             if (builds == null)
-                VerifyTexturesInPath(Core.Instance.assetBundleBuildOptions.bundlesPath, (int)buildOption.textureSize, () => BuildAssetBundles(null, buildOption.platform, outputPath, buildOption.suffix, buildOption.encrypt));
+                VerifyTexturesInPath(Instance.bundlesPath, (int)buildOption.textureSize, () => BuildAssetBundles(null, buildOption.platform, outputPath, buildOption.suffix, buildOption.encrypt));
             else
                 VerifyTexturesInBuilds(builds, (int)buildOption.textureSize, () => BuildAssetBundles(builds, buildOption.platform, outputPath, buildOption.suffix, buildOption.encrypt));
         }
 
-        EditorUtility.RevealInFinder(Core.Instance.assetBundleBuildOptions.outputPath);
+        EditorUtility.RevealInFinder(Instance.outputPath);
     }
 
     public static void BuildAssetBundles(AssetBundleBuild[] builds, BuildTarget target, string outputPath, string suffix, bool encrypt)
     {
         AssetBundleManifest result = null;
         if (builds == null || builds.Length == 0)
-            result = BuildPipeline.BuildAssetBundles(outputPath, Core.Instance.assetBundleBuildOptions.buildOptions, target);
+            result = BuildPipeline.BuildAssetBundles(outputPath, Instance.buildOptions, target);
         else
-            result = BuildPipeline.BuildAssetBundles(outputPath, builds, Core.Instance.assetBundleBuildOptions.buildOptions, target);
+            result = BuildPipeline.BuildAssetBundles(outputPath, builds, Instance.buildOptions, target);
 
         // list and encrypt assets if needed
         var items = result.GetAllAssetBundles();
@@ -109,7 +138,7 @@ public class AssetBundleBuilder
         File.AppendAllText(Path.Combine(outputPath, "Files.txt"), string.Concat(fileList.ToArray()));
     }
 
-    static public string VerifyDirectory(string outputPath, string folder)
+    public static string VerifyDirectory(string outputPath, string folder)
     {
         string outputFolder = Path.Combine(outputPath, folder);
         if (!Directory.Exists(outputFolder))
@@ -117,7 +146,7 @@ public class AssetBundleBuilder
         return outputFolder;
     }
 
-    static public void VerifyTexturesInBuilds(AssetBundleBuild[] builds, int sizefactor, System.Action callback)
+    public static void VerifyTexturesInBuilds(AssetBundleBuild[] builds, int sizefactor, System.Action callback)
     {
         if (sizefactor == 1)
         {
@@ -137,7 +166,7 @@ public class AssetBundleBuilder
         VerifyTexturesSize(textureList, sizefactor, callback);
     }
 
-    static public void VerifyTexturesInPath(string path, int sizefactor, System.Action callback)
+    public static void VerifyTexturesInPath(string path, int sizefactor, System.Action callback)
     {
         if (sizefactor == 1)
         {
@@ -153,7 +182,7 @@ public class AssetBundleBuilder
         VerifyTexturesSize(textureList, sizefactor, callback);
     }
 
-    static public void VerifyTexturesSize(List<BuildTextureData> textureList, int sizefactor, System.Action callback)
+    public static void VerifyTexturesSize(List<BuildTextureData> textureList, int sizefactor, System.Action callback)
     {
         //  verify texture size
         foreach (var texture in textureList)

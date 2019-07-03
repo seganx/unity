@@ -95,9 +95,9 @@ Shader "SeganX/FX/Reflection/Water"
 #else
                     i.uv2.y = 0.5f - (0.5f * i.uv2.y / i.uv2.w);
 #endif
-					fixed4 c = tex2D( _RflctTex, i.uv2 + w * _WaterPower) * _Color;
-                    c.rgb *= _ColorStrength;
-                    c.a *= a;
+					fixed4 c;
+                    c.rgb = tex2D(_RflctTex, i.uv2 + w * _WaterPower).rgb * _Color.rgb * _ColorStrength;
+                    c.a = a * _Color.a;
 					return c;
 				}
 				

@@ -2,9 +2,10 @@ Shader "SeganX/FX/Reflection/Blur"
 {
 	Properties 
 	{
+        _MaskTex("Water mask (RGB)", 2D) = "white" {}
 		_Color("Color", Color) = (1,1,1,1)
 		_ColorStrength ("Color Strength", Float) = 1
-		
+
 		[Enum(ON,1,OFF,0)]	_ZWrite ("Z Write", Int) = 1
 		[Enum(BACK,2,FRONT,1,OFF,0)]	_Cull ("Cull", Int) = 2
         [Enum(Zero,0,One,1,DstColor,2,SrcColor,3,SrcAlpha,5,DstAlpha,7,OneMinusSrcAlpha,10)] _BlendSrc("SrcFactor", Int) = 5
@@ -64,6 +65,7 @@ Shader "SeganX/FX/Reflection/Blur"
 				}
 			
                 uniform sampler2D _RflctBlurTex;
+                sampler2D _MaskTex;
                 float _ColorStrength;
 				float4 _Color;
 
@@ -75,8 +77,9 @@ Shader "SeganX/FX/Reflection/Blur"
 #else
                     i.uv1.y = 0.5f - (0.5f * i.uv1.y / i.uv1.w);
 #endif
-					fixed4 c = tex2D(_RflctBlurTex, i.uv1) * _Color;
-                    c.rgb *= _ColorStrength;
+                    fixed4 c = tex2D(_RflctBlurTex, i.uv1);
+                    c.rgb *= _Color.rgb * _ColorStrength;
+                    c.a = tex2D(_MaskTex, i.uv0).a * _Color.a;
 					return c;
 				}
 				

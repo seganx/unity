@@ -5,19 +5,21 @@ namespace SeganX
     [Serializable]
     public struct CryptoInt
     {
-        public int key;
-        public int value;
+        public int k;
+        public int v;
+
+        public int Value { get { return Decrypt(v, k); } }
 
         private CryptoInt(int a)
         {
             var rand = new Random((int)DateTime.Now.Ticks);
-            do { key = rand.Next(int.MinValue, int.MaxValue); } while (key == 0);
-            value = Encrypt(a, key);
+            do { k = rand.Next(int.MinValue, int.MaxValue); } while (k == 0);
+            v = Encrypt(a, k);
         }
 
         public override string ToString()
         {
-            return Decrypt(value, key).ToString();
+            return Decrypt(v, k).ToString();
         }
 
         public static implicit operator CryptoInt(int value)
@@ -27,29 +29,34 @@ namespace SeganX
 
         public static implicit operator int(CryptoInt value)
         {
-            return Decrypt(value.value, value.key);
+            return Decrypt(value.v, value.k);
+        }
+
+        public static implicit operator string(CryptoInt value)
+        {
+            return Decrypt(value.v, value.k).ToString();
         }
 
         public static CryptoInt operator ++(CryptoInt input)
         {
-            input = Decrypt(input.value, input.key) + 1;
+            input = Decrypt(input.v, input.k) + 1;
             return input;
         }
 
         public static CryptoInt operator --(CryptoInt input)
         {
-            input = Decrypt(input.value, input.key) - 1;
+            input = Decrypt(input.v, input.k) - 1;
             return input;
         }
 
-        public static int Encrypt(int value, int key)
+        private static int Encrypt(int value, int key)
         {
             var v = (value ^ key);
             var res = v + key;
             return res;
         }
 
-        public static int Decrypt(int value, int key)
+        private static int Decrypt(int value, int key)
         {
             var v = (value - key);
             var res = v ^ key;

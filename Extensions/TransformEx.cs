@@ -2,6 +2,54 @@
 
 public static class TransformEx
 {
+    public class DoRotate : MonoBehaviour
+    {
+        private Space space;
+        private float speed;
+        private Quaternion target;
+        public DoRotate Setup(float x, float y, float z, float speed, Space space)
+        {
+            target = Quaternion.Euler(x, y, z);
+            this.speed = speed;
+            this.space = space;
+            return this;
+        }
+
+        private void Update()
+        {
+            if (space == Space.Self)
+                transform.localRotation = Quaternion.RotateTowards(transform.localRotation, target, Time.deltaTime * speed);
+            else
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, target, Time.deltaTime * speed);
+            if (transform.rotation == target) Destroy(this);
+        }
+    }
+
+    public class DoGoToAnchordPosition : MonoBehaviour
+    {
+        private float speed;
+        private Vector3 target;
+        private RectTransform rectTransform;
+        public DoGoToAnchordPosition Setup(float x, float y, float z, float speed)
+        {
+            target.Set(x, y, z);
+            this.speed = speed;
+            rectTransform = transform as RectTransform;
+            return this;
+        }
+
+        private void Update()
+        {
+            rectTransform.anchoredPosition3D = Vector3.Lerp(rectTransform.anchoredPosition3D, target, Time.deltaTime * speed);
+            if ((rectTransform.anchoredPosition3D - target).sqrMagnitude <= 1)
+            {
+                rectTransform.anchoredPosition3D = target;
+                Destroy(this);
+            }
+        }
+    }
+
+
     public static Vector2 Scale(this Vector2 self, float x, float y)
     {
         self.x *= x; self.y *= y;
@@ -67,6 +115,15 @@ public static class TransformEx
         return self;
     }
 
+    public static Transform DoRotateToward(this Transform self, float x, float y, float z, float speed, Space space)
+    {
+        var com = self.GetComponent<DoRotate>();
+        if (com == null)
+            com = self.gameObject.AddComponent<DoRotate>();
+        com.Setup(x, y, z, speed, space);
+        return self;
+    }
+
     public static Transform RemoveChildrenBut(this Transform self, int except)
     {
         int count = except;
@@ -74,6 +131,16 @@ public static class TransformEx
             self.GetChild(0).DestroyNow();
         while (self.childCount > 1)
             self.GetChild(1).DestroyNow();
+        return self;
+    }
+
+    public static Transform RemoveChildrenBut(this Transform self, Transform except1, Transform except2)
+    {
+        for (int i = 0; i < self.childCount; i++)
+        {
+            if (self.GetChild(i) != except1 && self.GetChild(i) != except2)
+                GameObject.Destroy(self.GetChild(i).gameObject);
+        }
         return self;
     }
 
@@ -149,6 +216,47 @@ public static class TransformEx
         (self as RectTransform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
         (self as RectTransform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         return self as RectTransform;
+    }
+
+    public static Vector3 GetAnchordPositionInRect(this Transform self, RectTransform target)
+    {
+        Vector2 localPoint;
+        Vector2 screenP = RectTransformUtility.WorldToScreenPoint(null, self.position);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(target, screenP, null, out localPoint);
+        return localPoint;
+    }
+
+    public static RectTransform GoToAnchordPosition(this Transform self, float x, float y, float z, float speed)
+    {
+        var com = self.GetComponent<DoGoToAnchordPosition>();
+        if (com == null)
+            com = self.gameObject.AddComponent<DoGoToAnchordPosition>();
+        com.Setup(x, y, z, speed);
+        return self as RectTransform;
+    }
+
+    public static float GetEdge(this RectTransform self, RectTransform.Edge edge)
+    {
+        switch (edge)
+        {
+            case RectTransform.Edge.Left: return self.offsetMin.x;
+            case RectTransform.Edge.Right: return -self.offsetMax.x;
+            case RectTransform.Edge.Top: return -self.offsetMax.y;
+            case RectTransform.Edge.Bottom: return self.offsetMin.y;
+        }
+        return 0;
+    }
+
+    public static RectTransform SetEdge(this RectTransform self, RectTransform.Edge edge, float value)
+    {
+        switch (edge)
+        {
+            case RectTransform.Edge.Left: self.offsetMin = new Vector2(value, self.offsetMin.y); break;
+            case RectTransform.Edge.Right: self.offsetMax = new Vector2(-value, self.offsetMax.y); break;
+            case RectTransform.Edge.Top: self.offsetMax = new Vector2(self.offsetMax.x, -value); break;
+            case RectTransform.Edge.Bottom: self.offsetMin = new Vector2(self.offsetMin.x, value); break;
+        }
+        return self;
     }
 
     public static Transform SetPosition(this Transform self, float x, float y, float z)

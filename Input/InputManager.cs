@@ -78,6 +78,7 @@ namespace SeganX
         public static Button Break = new Button();
         public static Button Left = new Button();
         public static Button Right = new Button();
+        public static Button Horn = new Button();
 
         private static Vector3 tmp3D = Vector3.zero;
 

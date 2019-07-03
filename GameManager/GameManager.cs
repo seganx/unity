@@ -4,9 +4,8 @@ using UnityEngine;
 
 namespace SeganX
 {
-    public class GameManager : Base
+    public class GameManager<G> : Base where G : Component
     {
-        public int version = 1;
         public string prefabPath = "Prefabs/States/";
         public Canvas canvas = null;
 
@@ -34,7 +33,6 @@ namespace SeganX
             {
                 var delay = currentState.PreClose();
                 Destroy(currentState.gameObject, delay);
-                DelayCall(delay + 0.1f, () => Resources.UnloadUnusedAssets());
             }
 
             if (resetStack) stateStack.Clear();
@@ -55,7 +53,6 @@ namespace SeganX
             stateStack.RemoveAt(0);
             var delay = currentState.PreClose();
             Destroy(currentState.gameObject, delay);
-            DelayCall(delay + 0.1f, () => Resources.UnloadUnusedAssets());
 
             var state = Resources.Load<GameState>(prefabPath + stateStack[0].Name);
             currentState = Instantiate(state) as GameState;
@@ -94,7 +91,6 @@ namespace SeganX
             {
                 var delay = popup.PreClose();
                 Destroy(popup.gameObject, delay);
-                DelayCall(delay + 0.1f, () => Resources.UnloadUnusedAssets());
                 return true;
             }
             return false;
@@ -108,7 +104,7 @@ namespace SeganX
             return closeAll ? ClosePopup(closeAll) : guiStack.Count;
         }
 
-        public GameManager Back(GameState gameState)
+        public GameManager<G> Back(GameState gameState)
         {
             if (ClosePopup(gameState))
             {
@@ -175,7 +171,7 @@ namespace SeganX
         ////////////////////////////////////////////////////////////
         /// STATIC MEMBERS
         ////////////////////////////////////////////////////////////
-        private static GameManager instance = null;
-        public static GameManager Instance { get { return instance == null ? (instance = FindObjectOfType<GameManager>()) : instance; } }
+        private static G instance = null;
+        public static G Instance { get { return instance == null ? (instance = FindObjectOfType<G>()) : instance; } }
     }
 }
