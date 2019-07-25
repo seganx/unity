@@ -99,10 +99,11 @@
                 float _SpecularPower2;
                 float _SpecularAtten2;
                 float _MetalPower2;
+                uniform float bloomSpecular;
 
                 fixed4 frag(v2f i) : SV_Target
                 {
-                    fixed4 res;
+                    fixed4 res = bloomSpecular;
 
                     uint matId = round(i.colr.r * 255) / 10;
                     if (matId == 1)
@@ -125,17 +126,16 @@
                     {
                         if (_Reflection1 > 0.01f)
                         {
-                            half3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
-                            float alpha = (cube.r + cube.b + cube.g) / 3.0f;
+                            half cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
                             res.rgb += cube * _Reflection1;
-                            res.a += alpha * _Reflection1;
+                            res.a = max(res.a, cube * _Reflection1);
                         }
 
                         if (_SpecularAtten1 > 0.01f)
                         {
                             float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
                             res.rgb += (_SpecularColor1.rgb + _LightColor0.rgb * _SpecularColor1.a) * spec;
-                            res.a += spec;
+                            res.a = max(res.a, pow(spec, 8));
                         }
                     }
                     else// if (matId == 2)
@@ -143,10 +143,9 @@
                         res.rgb *= 0.7f;
                         if (_Reflection2 > 0.01f)
                         {
-                            half3 cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb;
-                            float alpha = (cube.r + cube.b + cube.g) / 3.0f;
+                            half cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
                             res.rgb += cube * _Reflection2;
-                            res.a += alpha * _Reflection2;
+                            res.a = max(res.a, cube * _Reflection2);
                         }
 
                         if (_SpecularAtten2 > 0.01f)

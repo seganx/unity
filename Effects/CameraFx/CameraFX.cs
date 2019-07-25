@@ -41,7 +41,6 @@ namespace SeganX.Effects
             frameBuffer = CreateBuffer(Width, Height, false);
             screenBuffer = CreateBuffer(Width, Height, false);
             LutIndex = LutIndex;
-            MotionBlur = MotionBlur;
         }
 
         private void Clear()
@@ -90,6 +89,13 @@ namespace SeganX.Effects
 
             Graphics.Blit(screenBuffer, null as RenderTexture, blitMaterial);
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            bloom.Clear();
+        }
+#endif
 
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -194,13 +200,17 @@ namespace SeganX.Effects
             }
         }
 
-        public static bool MotionBlur
+        public static float MotionBlurValue
         {
-            get { return PlayerPrefs.GetInt("CameraFx.MotionBlur", 1) > 0; }
+            get { return instance ? (1 - instance.postMaterial.color.a) : 0; }
             set
             {
-                PlayerPrefs.SetInt("CameraFx.MotionBlur", value ? 1 : 0);
-                if (instance) instance.postMaterial.color = new Color(1, 1, 1, value ? 0.85f : 1);
+                if (instance)
+                {
+                    var c = instance.postMaterial.color;
+                    c.a = 1 - value;
+                    instance.postMaterial.color = c;
+                }
             }
         }
 

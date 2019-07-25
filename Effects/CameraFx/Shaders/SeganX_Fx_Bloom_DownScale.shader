@@ -50,11 +50,13 @@
                 fixed4 c3 = tex2D(_MainTex, i.uv - _Offset.xy);
                 fixed4 c4 = tex2D(_MainTex, i.uv + _Offset.zw);
                 fixed4 c5 = tex2D(_MainTex, i.uv - _Offset.zw);
-                fixed4 col = (c1 * c1.a + c2 * c2.a + c3 * c3.a + c4 * c4.a + c5 * c5.a) / 5;
-                //fixed4 col = (c1 + c2 + c3 + c4 + c5) / 4;
-                //fixed4 col = c5;
 
-                col.rgb = col.rgb * col.rgb * pow((col.r + col.g + col.b) / 3, _FilterRange) * _FilterRange * 0.5f;
+                fixed4 col;
+                col.rgb = (c1.rgb + c2.rgb + c3.rgb + c4.rgb + c5.rgb) / 5;
+                col.a = (c1.a + c2.a + c3.a + c4.a + c5.a) / 5;
+
+                col.a = max(col.r, max(col.g, col.b)) * col.a * col.a * pow(col.a, _FilterRange) * _FilterRange * 0.5f;
+                col.a = col.a < 0.05 ? 0 : col.a;
                 return col;
 			}
 			ENDCG

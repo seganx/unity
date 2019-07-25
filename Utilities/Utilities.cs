@@ -40,6 +40,13 @@ namespace SeganX
             }
         }
 
+        public static DateTime UnixTimeToTime(string date)
+        {
+            DateTime res = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            res = res.AddSeconds(double.Parse(date));
+            return res;
+        }
+
         public static DateTime UnixTimeToLocalTime(string date)
         {
             DateTime res = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);

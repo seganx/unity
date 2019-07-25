@@ -1,9 +1,24 @@
 ﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
+using UnityEngine;
 
-public static class BadWordsFinder
+public class BadWordsFinder : MonoBehaviour
 {
+    [SerializeField] private TextAsset badWords = null;
+
+    private void Awake()
+    {
+        if (badWords == null) return;
+        var bads = badWords.text.Split(new string[] { "\n", "\r\n" }, System.StringSplitOptions.RemoveEmptyEntries);
+        if (bads.IsNullOrEmpty()) return;
+        Initialize(bads);
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ///////////////////////////////////////////////////////////////////////////////////
     private static readonly string patternTemplate = @"+([\d]|[^\w]|_)*";
     private static List<Regex> badWordMatchers = new List<Regex>();
 

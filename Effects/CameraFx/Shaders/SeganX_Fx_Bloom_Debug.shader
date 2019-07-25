@@ -1,9 +1,7 @@
-﻿Shader "SeganX/FX/Bloom/Post"
+﻿Shader "SeganX/FX/Bloom/Debug"
 {
     Properties
     {
-        _Color("Color", Color) = (1,1,1,1)
-        _RGBStrength("RGB Strength", Float) = 1
         [HideInInspector]_MainTex("Texture", 2D) = "white" {}
 
         [Enum(Zero,0,One,1,DstColor,2,SrcColor,3,SrcAlpha,5,DstAlpha,7,OneMinusSrcAlpha,10)] _BlendSrc("SrcFactor", Int) = 5
@@ -45,15 +43,12 @@
                 }
 
                 sampler2D _MainTex;
-                fixed4 _Color;
-                fixed _RGBStrength;
-
                 fixed4 frag(v2f i) : SV_Target
                 {
                     fixed4 col = tex2D(_MainTex, i.uv);
-                    col.rgb *= _RGBStrength;
-                    col.a = pow(col.a, 0.75f);
-                    return col * _Color;
+                    col.rgb *= col.a;
+                    col.a = 1;
+                    return col;
                 }
                 ENDCG
             }

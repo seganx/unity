@@ -49,8 +49,9 @@
                 fixed4 c3 = tex2D(_MainTex, i.uv - _Offset.xy);
                 fixed4 c4 = tex2D(_MainTex, i.uv + _Offset.zw);
                 fixed4 c5 = tex2D(_MainTex, i.uv - _Offset.zw);
-                //return (c1 * c1.a + c2 * c2.a + c3 * c3.a + c4 * c4.a + c5 * c5.a) / 5;
-                return (c1 + c2 + c3 + c4 + c5) / 4;
+                //return max(c1, max(c2, max(c3, max(c4, c5))));
+                //return (c1 * c1.a + c2 * c2.a + c3 * c3.a + c4 * c4.a + c5 * c5.a) / (c1.a + c2.a + c3.a + c4.a + c5.a + 0.00005f);
+                return (c1 + c2 + c3 + c4 + c5) / 3;
                 //return c1;
 			}
 			ENDCG

@@ -16,6 +16,7 @@ namespace SeganX
         public WrapMode wrapMode = WrapMode.PingPong;
         public float speed = 1;
         public float length = 1;
+        public bool randomTime = true;
 
         private float time = 0;
         private float timeAdvance = 1;
@@ -31,6 +32,8 @@ namespace SeganX
         {
             if (graphic == null)
                 graphic = GetComponent<Graphic>();
+            if (randomTime)
+                time = Random.Range(0, length);
         }
 
         private void Start()

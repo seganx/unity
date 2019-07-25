@@ -20,6 +20,8 @@ namespace SeganX.Effects
 
         private IEnumerator Start()
         {
+            CameraFX.Resolution = 100;
+            CameraFX.Bloom = true;
             yield return new WaitUntil(() => CameraFX.Activated);
             var waitfor = new WaitForSeconds(sampleTime + 0.1f);
             yield return waitfor;

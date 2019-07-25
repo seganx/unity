@@ -339,6 +339,17 @@ public static class MonoEx
         return self.Length - 1;
     }
 
+    public static int LastIndex<T>(this List<T> self)
+    {
+        return self.Count - 1;
+    }
+
+    public static T LastOne<T>(this List<T> self)
+    {
+        return self[self.Count - 1];
+    }
+
+
     public static bool IsNullOrEmpty(this System.Array self)
     {
         return self == null || self.Length < 1;
@@ -393,14 +404,14 @@ public static class MonoEx
         return selected;
     }
 
-    public static T RandomOne<T>(this System.Array self)
+    public static T RandomOne<T>(this System.Array self, T defaultValue = default(T))
     {
-        return (self != null && self.Length > 1) ? (T)self.GetValue(Random.Range(0, int.MaxValue) % self.Length) : default(T);
+        return (self != null && self.Length > 1) ? (T)self.GetValue(Random.Range(0, int.MaxValue) % self.Length) : defaultValue;
     }
 
-    public static T RandomOne<T>(this List<T> self)
+    public static T RandomOne<T>(this List<T> self, T defaultValue = default(T))
     {
-        return (self != null && self.Count > 0) ? self[Random.Range(0, int.MaxValue) % self.Count] : default(T);
+        return (self != null && self.Count > 0) ? self[Random.Range(0, int.MaxValue) % self.Count] : defaultValue;
     }
     #endregion
 

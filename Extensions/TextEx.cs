@@ -110,7 +110,7 @@ public static class TextEx
                 }
                 // else do nothing
             }
-            //else self.text = null;
+            else self.text = text;
         }
         else self.text = text;
 

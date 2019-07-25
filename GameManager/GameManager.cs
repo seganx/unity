@@ -59,6 +59,8 @@ namespace SeganX
             currentState.name = state.name;
             AttachState(currentState);
 
+            OnOpenState(currentState);
+
             return currentState;
         }
 

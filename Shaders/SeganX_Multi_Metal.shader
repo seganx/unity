@@ -121,8 +121,6 @@
                 float4 frag(v2f i) : SV_Target
                 {
                     float4 res = bloomSpecular;
-                    half3 cube = 0;
-                    float spec = 0;
 
                     uint matId = round(i.colr.r * 255) / 10;
                     if (matId == 1)
@@ -152,30 +150,32 @@
                     {
                         if (_Reflection1 > 0.001f)
                         {
-                            cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb * _Reflection1;
-                            res.rgb = lerp(res.rgb, 1, cube.r);
+                            float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
+                            cube *= cube;
+                            res.a = max(res.a, cube * (1 - (res.r + res.g + res.b) / 7));
+                            res.rgb += cube * _Reflection1;
                         }
 
                         if (_SpecularAtten1 > 0.01f)
                         {
-                            spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
+                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
                             res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a += spec;
-                        }
+                            res.a = max(res.a, spec);
 
-                        if (_MetalPower1 > 0.01f)
-                        {
-                            fixed metal = tex2D(_MetalTex, i.uv2).a;
-                            res.rgb += max(spec * _LightColor0.rgb, cube * 0.5f) * metal * _MetalPower1;
+                            if (_MetalPower1 > 0.01f)
+                            {
+                                fixed metal = tex2D(_MetalTex, i.uv2).a;
+                                res.rgb += spec * _LightColor0.rgb * metal * _MetalPower1;
+                            }
                         }
                     }
                     else if (matId == 2)
                     {
                         if (_SpecularAtten2 > 0.01f)
                         {
-                            spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower2) * _SpecularAtten2;
+                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower2) * _SpecularAtten2;
                             res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a += spec;
+                            res.a = max(res.a, spec);
 
                             if (_MetalPower2 > 0.01f)
                             {
@@ -188,21 +188,23 @@
                     {
                         if (_Reflection3 > 0.001f)
                         {
-                            cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).rgb * _Reflection3;
-                            res.rgb = lerp(res.rgb, 1, cube.r);
-                        }
- 
-                        if (_SpecularAtten3 > 0.01f)
-                        {
-                            spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower3) * _SpecularAtten3;
-                            res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a += spec;
+                            float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
+                            cube *= cube;
+                            res.a = max(res.a, cube * (1 - (res.r + res.g + res.b) / 6));
+                            res.rgb = lerp(res.rgb, _Reflection3, cube * _Reflection3);
                         }
 
-                        if (_MetalPower3 > 0.01f)
+                        if (_SpecularAtten3 > 0.01f)
                         {
-                            fixed metal = tex2D(_MetalTex, i.uv2).a;
-                            res.rgb += max(spec, cube * 0.5f) * metal * _MetalPower3;
+                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower3) * _SpecularAtten3;
+                            res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
+                            res.a = max(res.a, spec);
+
+                            if (_MetalPower3 > 0.01f)
+                            {
+                                fixed metal = tex2D(_MetalTex, i.uv2).a;
+                                res.rgb += spec * metal * _MetalPower3;
+                            }
                         }
                     }
 
