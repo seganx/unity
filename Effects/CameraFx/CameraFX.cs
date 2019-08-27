@@ -202,10 +202,10 @@ namespace SeganX.Effects
 
         public static float MotionBlurValue
         {
-            get { return instance ? (1 - instance.postMaterial.color.a) : 0; }
+            get { return (instance && instance.postMaterial) ? (1 - instance.postMaterial.color.a) : 0; }
             set
             {
-                if (instance)
+                if (instance && instance.postMaterial)
                 {
                     var c = instance.postMaterial.color;
                     c.a = 1 - value;

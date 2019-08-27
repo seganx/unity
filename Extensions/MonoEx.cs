@@ -236,6 +236,14 @@ public static class MonoEx
         return lines.Length;
     }
 
+    public static string SubString(this string self, int startIndex, int count)
+    {
+        if (self == null) return string.Empty;
+        if (startIndex >= self.Length) return string.Empty;
+        if (startIndex + count >= self.Length) count = self.Length - startIndex;
+        return self.Substring(startIndex, count);
+    }
+
     public static string CleanFromCode(this string self)
     {
         return (self == null) ? null : self.Replace('"', '\'');
@@ -245,6 +253,16 @@ public static class MonoEx
     {
         return (self == null) ? null : self.Replace('ي', 'ی');
     }
+
+    public static bool IsLetterOrDigit(this string self)
+    {
+        if (self == null || self.Length < 1) return false;
+        for (int i = 0; i < self.Length; i++)
+            if (char.IsLetterOrDigit(self[i]) == false || char.IsSymbol(self[i]) || char.IsControl(self[i]))
+                return false;
+        return true;
+    }
+
 
     public static string Persian(this string self, bool force = true)
     {

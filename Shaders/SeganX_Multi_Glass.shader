@@ -87,74 +87,56 @@
                 }
 
 
-                sampler2D _MetalTex;
                 fixed4 _DiffColor1;
                 fixed4 _DiffColor2;
-                fixed4 _SpecularColor1;
-                fixed4 _SpecularColor2;
                 float _Reflection1;
                 float _Reflection2;
                 float _SpecularPower1;
                 float _SpecularAtten1;
                 float _SpecularPower2;
                 float _SpecularAtten2;
-                float _MetalPower2;
                 uniform float bloomSpecular;
+
 
                 fixed4 frag(v2f i) : SV_Target
                 {
-                    fixed4 res = bloomSpecular;
+                    //  extract material id from vertex color
+                    uint umatId = (round(i.colr.r * 255) / 10) - 1;
+                    float matId = clamp(umatId, 0, 1);
+                    
+                    // compute parametres based on material id
+                    fixed4 diffcolor = lerp(_DiffColor1, _DiffColor2, matId);
+                    float reflection = lerp(_Reflection1, _Reflection2, matId);
+                    float specpower = lerp(_SpecularPower1, _SpecularPower2, matId);
+                    float specvalue = lerp(_SpecularAtten1, _SpecularAtten2, matId);
 
-                    uint matId = round(i.colr.r * 255) / 10;
-                    if (matId == 1)
-                    {
-                        res = _DiffColor1;
-                    }
-                    else 
-                    {
-                        res = tex2D(_MainTex, i.uv0);
-                        res *= _DiffColor2;
-                    }
-
-                    half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
+                    // compute lighting params
                     half3 lightDir = _WorldSpaceLightPos0.xyz;
-                    fixed3 diffuse = _LightColor0.rgb * max(0, dot(i.norm, lightDir));
-                    fixed3 ambient = (i.norm.y > 0) ? lerp(unity_AmbientEquator.rgb, unity_AmbientSky.rgb, i.norm.y) : lerp(unity_AmbientEquator.rgb, unity_AmbientGround.rgb, -i.norm.y);
-                    res.rgb *= (diffuse + ambient);
+                    half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
 
-                    if (matId == 1)
+                    // construct basic color
+                    fixed4 res = lerp(1, tex2D(_MainTex, i.uv0), matId) * diffcolor;
+
+                    // apply basic lighting
                     {
-                        if (_Reflection1 > 0.01f)
-                        {
-                            half cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
-                            res.rgb += cube * _Reflection1;
-                            res.a = max(res.a, cube * _Reflection1);
-                        }
-
-                        if (_SpecularAtten1 > 0.01f)
-                        {
-                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
-                            res.rgb += (_SpecularColor1.rgb + _LightColor0.rgb * _SpecularColor1.a) * spec;
-                            res.a = max(res.a, pow(spec, 8));
-                        }
+                        fixed3 diffuse = _LightColor0.rgb * max(0, dot(i.norm, lightDir));
+                        fixed3 ambient = (i.norm.y > 0) ? lerp(unity_AmbientEquator.rgb, unity_AmbientSky.rgb, i.norm.y) : lerp(unity_AmbientEquator.rgb, unity_AmbientGround.rgb, -i.norm.y);
+                       // res.rgb *= (diffuse + ambient);
                     }
-                    else// if (matId == 2)
+
+                    // apply reflection
                     {
-                        res.rgb *= 0.7f;
-                        if (_Reflection2 > 0.01f)
-                        {
-                            half cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
-                            res.rgb += cube * _Reflection2;
-                            res.a = max(res.a, cube * _Reflection2);
-                        }
-
-                        if (_SpecularAtten2 > 0.01f)
-                        {
-                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower2) * _SpecularAtten2;
-                            res.rgb += (_SpecularColor2.rgb + _LightColor0.rgb * _SpecularColor2.a) * spec;
-                            res.a += spec;
-                        }
+                        half cube = UNITY_SAMPLE_TEXCUBE( unity_SpecCube0, reflect(-viewDir, i.norm) ).r;
+                        res.rgb += cube * reflection;
+                        res.a = max(res.a, cube * reflection);
                     }
+
+                    // apply specular
+                    {
+                        float spec = pow( max( 0, dot(i.norm, normalize(lightDir + viewDir))), specpower) * specvalue;
+                        res.rgb += _LightColor0.rgb * spec;
+                        res.a = max(res.a, pow(spec, 8));
+                    }                    
 
                     UNITY_APPLY_FOG(i.fogCoord, res);
                     return res;

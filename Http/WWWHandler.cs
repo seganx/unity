@@ -30,17 +30,15 @@ namespace SeganX
             }
         }
 
-        public void DownloadText(string url, string postData, Dictionary<string, string> header, System.Action<UnityWebRequest> callback)
+        public void DownloadText(string url, string postData, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
             StartCoroutine(DoDownloadText(url, postData, header, callback));
         }
 
-        private IEnumerator DoDownloadText(string url, string postdata, Dictionary<string, string> header, System.Action<UnityWebRequest> callback)
+        private IEnumerator DoDownloadText(string url, string postdata, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
             UnityWebRequest res = postdata == null ? UnityWebRequest.Get(url) : UnityWebRequest.Post(url, postdata);
-#if !UNITY_EDITOR
-            res.timeout = requestTimeout;
-#endif
+
             if (res.method == UnityWebRequest.kHttpVerbPOST)
             {
                 var uploader = new UploadHandlerRaw(postdata.GetBytes());
@@ -62,10 +60,16 @@ namespace SeganX
                 Debug.Log(debug);
             }
 
-            yield return res.SendWebRequest();
+            var ret = Time.time;
+            var req = res.SendWebRequest();
+            yield return new WaitUntil(() => req.isDone || (Time.time - ret) > requestTimeout);
 
             //  print the result
-            Debug.Log("Downloaded " + res.downloadedBytes + " Bytes from " + res.method + " " + url + "\nHeader: " + res.GetResponseHeaders().GetStringDebug() + "\nError" + res.error + "\n" + res.downloadHandler.text);
+            Debug.Log(
+                "Downloaded " + res.downloadedBytes + " Bytes from " + res.method + " " + url + 
+                "\nHeader: " + res.GetResponseHeaders().GetStringDebug() + 
+                "\nError" + (res.error.HasContent() ? res.error : "No error") + 
+                "\n" + res.downloadHandler.text);
 
             callback(res);
         }
@@ -99,7 +103,7 @@ namespace SeganX
         public static string userheader = string.Empty;
         public static int requestTimeout { get { return WWWHandler.requestTimeout; } set { WWWHandler.requestTimeout = value; } }
 
-        public static void DownloadText(string url, string postdata, Dictionary<string, string> header, System.Action<string> callback, System.Action<float> onProgress = null)
+        public static void DownloadText(string url, string postdata, Dictionary<string, string> header, Action<string> callback, Action<float> onProgress = null)
         {
             if (Application.internetReachability != NetworkReachability.NotReachable)
             {
@@ -113,7 +117,7 @@ namespace SeganX
             }
         }
 
-        private static void PostDownloadText(UnityWebRequest wr, System.Action<string> callback)
+        private static void PostDownloadText(UnityWebRequest wr, Action<string> callback)
         {
             if (wr.isDone && wr.responseCode == 200)
             {

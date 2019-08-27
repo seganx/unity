@@ -1,4 +1,8 @@
-﻿Shader "SeganX/Multi/Metal"
+﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+Shader "SeganX/Multi/Metal"
 {
     Properties
     {
@@ -6,6 +10,7 @@
         _VinylTex("Vinyl Texture", 2D) = "black" {}
         _MetalTex("Metal Texture", 2D) = "black" {}
 
+        [Enum(Off,1,Transparent,0)]	    _FillMode("Fill Mode", Float) = 1
         [Enum(ON,1,OFF,0)]	            _ZWrite("Z Write", Int) = 0
         [Enum(BACK,2,FRONT,1,OFF,0)]	_Cull("Cull", Int) = 2
 
@@ -13,6 +18,7 @@
         [Header(Material id 1)]
         _DiffColor1("1: Diffuse Color (alpha x vertex.color)", Color) = (1,1,1,1)
         _VinylColor("1: Vinyl Color", Color) = (1,1,1,1)
+        _GlossColor("Gloss Color", Color) = (1,1,1,1)
         _Reflection1("1: Reflection", Range(0, 1)) = 0.5
         [Space]
         _SpecularAtten1("1: Specular", Range(0, 2)) = 0.75
@@ -34,6 +40,8 @@
         _SpecularAtten3("3: Specular", Range(0, 2)) = 0.5
         _SpecularPower3("3: Specular Power", Range(5, 200)) = 50
         _MetalPower3("3: MetalPower", Range(0, 2)) = 1.5
+        
+            
     }
 
         SubShader
@@ -74,9 +82,10 @@
                     float4 colr : COLOR;
                     float2 uv0 : TEXCOORD0;
                     float2 uv1 : TEXCOORD1;
-                    float2 uv2 : TEXCOORD3;
-                    float3 wrl : TEXCOORD2;
-                    UNITY_FOG_COORDS(4)
+                    float2 uv2 : TEXCOORD2;
+                    float3 wrl : TEXCOORD3;
+                    float2 zdp : TEXCOORD4;
+                    UNITY_FOG_COORDS(5)
                 };
 
                 sampler2D _MainTex;
@@ -96,12 +105,20 @@
                     o.uv1 = TRANSFORM_TEX(v.uv1, _VinylTex);
                     o.uv2 = TRANSFORM_TEX(v.uv1, _MetalTex);
                     o.wrl = mul(unity_ObjectToWorld, v.vrtx).xyz;
+
+                    o.zdp.x = 0.5f * abs(o.vrtx.x / o.vrtx.w);
+                    const float depz = -1.0f / (15.0f - 0.0f);
+                    const float depw = 15.0f / (15.0f - 0.0f);
+                    o.zdp.y = 0.5f * (UNITY_Z_0_FAR_FROM_CLIPSPACE(o.vrtx.z) * depz + depw);
+
                     UNITY_TRANSFER_FOG(o, o.vrtx);
                     return o;
                 }
 
 
+                fixed  _FillMode;
                 fixed4 _VinylColor;
+                fixed4 _GlossColor;
                 fixed4 _DiffColor1;
                 fixed4 _DiffColor3;
                 fixed4 _DiffColor2;
@@ -118,98 +135,83 @@
                 float _MetalPower2;
                 uniform float bloomSpecular;
 
+                float matlerp(uint matId, float v1, float v2, float v3)
+                {
+                    fixed4 r1 = lerp(v1, v2, clamp(matId, 0, 1));
+                    fixed4 r2 = lerp(v2, v3, clamp(matId - 1, 0, 1));
+                    return lerp(r1, r2, clamp(matId * 0.5f, 0, 1));
+                }
+
+                fixed4 matlerp(uint matId, fixed4 v1, fixed4 v2, fixed4 v3)
+                {
+                    fixed4 r1 = lerp(v1, v2, clamp(matId, 0, 1));
+                    fixed4 r2 = lerp(v2, v3, clamp(matId - 1, 0, 1));
+                    return lerp(r1, r2, clamp(matId * 0.5f, 0, 1));
+                }
+
                 float4 frag(v2f i) : SV_Target
                 {
-                    float4 res = bloomSpecular;
+                    clip(_FillMode + i.zdp.x + frac(i.vrtx.x * 0.5f) - i.zdp.y);
+                    clip(_FillMode + i.zdp.x + frac(i.vrtx.y * 0.5f) - i.zdp.y);
+                    //clip(_FillMode + i.zdp.x + frac(i.vrtx.x * 0.5f) - frac(i.vrtx.y * 0.5f) - i.zdp.y);
 
-                    uint matId = round(i.colr.r * 255) / 10;
-                    if (matId == 1)
-                    {
-                        half4 v = tex2D(_VinylTex, i.uv1) * _VinylColor;
-                        res.rgb = lerp(tex2D(_MainTex, i.uv0).rgb * _DiffColor1.rgb, v.rgb, v.a);
-                        res.rgb *= clamp(i.colr.a + _DiffColor1.a, 0, 1);
-                    }
-                    else
-                    {
-                        res.rgb = tex2D(_MainTex, i.uv0).rgb;
-                        if (matId == 3)
-                            res.rgb *= _DiffColor3.rgb * clamp(i.colr.a + _DiffColor3.a, 0, 1);
-                        else
-                            res.rgb *= _DiffColor2.rgb * clamp(i.colr.a + _DiffColor2.a, 0, 1);
-                    }
+                    //  extract material id from vertex color
+                    uint matId = (round(i.colr.r * 255) / 10) - 1;  
 
+                    // compute parametres based on material id
+                    fixed4 diffcolor = matlerp(matId, _DiffColor1, _DiffColor2, _DiffColor3);
+                    float reflection = matlerp(matId, _Reflection1, 0, _Reflection3);
+                    float specpower = matlerp(matId, _SpecularPower1, _SpecularPower2, _SpecularPower3);
+                    float specvalue = matlerp(matId, _SpecularAtten1, _SpecularAtten2, _SpecularAtten3);
+                    float metallic = matlerp(matId, _MetalPower1, _MetalPower2, _MetalPower3);
+
+                    // compute lighting params
                     half3 lightDir = _WorldSpaceLightPos0.xyz;
+                    half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
+                    float refresnel = 0.27f + 1 - dot(viewDir, i.norm);
+
+                    // construct basic color
+                    float4 res = float4( tex2D( _MainTex, i.uv0 ).rgb * diffcolor.rgb, bloomSpecular );
+                    {
+                        //  apply vinyl texture and color
+                        half4 v = tex2D(_VinylTex, i.uv1) * _VinylColor;
+                        res.rgb = lerp(lerp(res.rgb, v.rgb, v.a), res.rgb, clamp(matId, 0, 1));
+                    }
+                    res.rgb *= clamp(i.colr.a + diffcolor.a, 0, 1);
+
+                    // apply basic lighting
                     {
                         half dl = max(0, dot(i.norm, lightDir));
                         fixed3 ambient = (i.norm.y > 0) ? lerp(unity_AmbientEquator.rgb, unity_AmbientSky.rgb, i.norm.y) : lerp(unity_AmbientEquator.rgb, unity_AmbientGround.rgb, -i.norm.y);
                         res.rgb *= lerp(ambient, _LightColor0.rgb, dl);
                     }
-
-                    half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
-                    if (matId == 1)
+                    
+                    // apply reflection
                     {
-                        if (_Reflection1 > 0.001f)
-                        {
-                            float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
-                            cube *= cube;
-                            res.a = max(res.a, cube * (1 - (res.r + res.g + res.b) / 7));
-                            res.rgb += cube * _Reflection1;
-                        }
-
-                        if (_SpecularAtten1 > 0.01f)
-                        {
-                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower1) * _SpecularAtten1;
-                            res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a = max(res.a, spec);
-
-                            if (_MetalPower1 > 0.01f)
-                            {
-                                fixed metal = tex2D(_MetalTex, i.uv2).a;
-                                res.rgb += spec * _LightColor0.rgb * metal * _MetalPower1;
-                            }
-                        }
-                    }
-                    else if (matId == 2)
-                    {
-                        if (_SpecularAtten2 > 0.01f)
-                        {
-                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower2) * _SpecularAtten2;
-                            res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a = max(res.a, spec);
-
-                            if (_MetalPower2 > 0.01f)
-                            {
-                                fixed metal = tex2D(_MetalTex, i.uv2).a;
-                                res.rgb += spec * metal * _MetalPower2;
-                            }
-                        }
-                    }
-                    else if (matId == 3)
-                    {
-                        if (_Reflection3 > 0.001f)
-                        {
-                            float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
-                            cube *= cube;
-                            res.a = max(res.a, cube * (1 - (res.r + res.g + res.b) / 6));
-                            res.rgb = lerp(res.rgb, _Reflection3, cube * _Reflection3);
-                        }
-
-                        if (_SpecularAtten3 > 0.01f)
-                        {
-                            float spec = pow(max(0, dot(i.norm, normalize(lightDir + viewDir))), _SpecularPower3) * _SpecularAtten3;
-                            res.rgb = lerp(res.rgb, _LightColor0.rgb, spec);
-                            res.a = max(res.a, spec);
-
-                            if (_MetalPower3 > 0.01f)
-                            {
-                                fixed metal = tex2D(_MetalTex, i.uv2).a;
-                                res.rgb += spec * metal * _MetalPower3;
-                            }
-                        }
+                        float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
+                        cube *= cube;
+                        res.a = max(res.a, cube * refresnel * reflection);
+                        res.rgb += refresnel * cube * reflection;
                     }
 
+                    // apply specular
+                    {
+                        float spec = max( 0, dot( i.norm, normalize( lightDir + viewDir ) ) );
 
+                        //  layer 1 - gloss color
+                        res.rgb += _GlossColor.rgb * pow(spec, 10) * specvalue * metallic;
+
+                        //  layer 2 - specular color
+                        res.rgb = lerp( res.rgb, _LightColor0.rgb, clamp( pow(spec, specpower * 2) * specvalue, 0, 1 ) );
+                        res.a = max(res.a, pow(spec, specpower * 80) * specvalue * 8);
+
+                        // layer 3 - metallic 
+                        res.rgb += tex2D(_MetalTex, i.uv2).a * metallic * pow(spec, 15);
+                    }
+
+                    // apply fog
                     UNITY_APPLY_FOG(i.fogCoord, res);
+
                     return res;
                 }
                 ENDCG

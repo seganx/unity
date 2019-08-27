@@ -8,16 +8,16 @@ namespace SeganX
 {
     public class PersianPreviewAttribute : PropertyAttribute
     {
-        public float height = 0;
+        public int lines = 0;
         public bool force = true;
         public PersianPreviewAttribute() { }
         public PersianPreviewAttribute(bool forcePersian)
         {
             force = forcePersian;
         }
-        public PersianPreviewAttribute(int previewHeight, bool forcePersian = true)
+        public PersianPreviewAttribute(int lines, bool forcePersian = true)
         {
-            height = previewHeight;
+            this.lines = lines;
             force = forcePersian;
         }
     }
@@ -35,24 +35,23 @@ namespace SeganX
         };
 
         private float baseHeight;
-        private float previewHeight;
+        private int lines;
         private bool forcePersian = true;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             baseHeight = base.GetPropertyHeight(property, label);
-            previewHeight = attribute.As<PersianPreviewAttribute>().height;
+            lines = attribute.As<PersianPreviewAttribute>().lines;
             forcePersian = attribute.As<PersianPreviewAttribute>().force;
-            if (previewHeight == 0) previewHeight = baseHeight;
-            return baseHeight + previewHeight;
+            if (lines < 1) lines = 1;
+            return baseHeight * lines * 2;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            position.height = baseHeight;
-            EditorGUI.PropertyField(position, property);
-            position.y += baseHeight;
-            position.height = previewHeight;
+            position.height /= 2;
+            property.stringValue = EditorGUI.TextArea(position, property.stringValue);
+            position.y += position.height;
             EditorGUI.LabelField(position, property.stringValue.CleanFromCode().CleanForPersian().Persian(forcePersian), style);
         }
     }

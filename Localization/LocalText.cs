@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace SeganX
 {
     [ExecuteInEditMode]
+    [DefaultExecutionOrder(-2)]
     [AddComponentMenu("UI/SeganX/LocalText")]
     public class LocalText : Base
     {

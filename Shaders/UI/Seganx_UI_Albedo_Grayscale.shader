@@ -87,10 +87,10 @@ Shader "Seganx/UI/GrayScale" {
 				fixed4 c = tex2D(_MainTex, i.texcoord);
 				clip (c.a - 0.01);
 				
+                c.rgb *= i.color.rgb;
 				fixed g = (c.r + c.g + c.b) / 3;
 				fixed4 res = g * (1 - i.color.a) + c * i.color.a;
 				
-				res.rgb *= i.color.rgb;
 				res.a = c.a;				
 				return res;
 			}
