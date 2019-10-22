@@ -10,7 +10,6 @@ namespace SeganX.Effects
 
         private float timeCounter = 0;
         private int frameCounter = 0;
-        private float fps = 0;
         private float lastfps = 0;
 
         private void Awake()
@@ -22,16 +21,22 @@ namespace SeganX.Effects
         {
             CameraFX.Resolution = 100;
             CameraFX.Bloom = true;
+            CameraFX.Quality = 0;
+            Step = 1;
+            Fps = 0;
+
             yield return new WaitUntil(() => CameraFX.Activated);
+
             var waitfor = new WaitForSeconds(sampleTime + 0.1f);
             yield return waitfor;
             int counter = 10;
-            while (counter-- > 0)
+            while (IsRunning && counter-- > 0)
             {
                 yield return waitfor;
-                if (Mathf.Abs(lastfps - fps) < 5)
+                if (Mathf.Abs(lastfps - Fps) < 5)
                 {
-                    if (fps < 55)
+                    Step++;
+                    if (Fps < 45)
                     {
                         if (CameraFX_Reflection.Activate)
                         {
@@ -39,17 +44,23 @@ namespace SeganX.Effects
                             var refcam = FindObjectOfType<CameraFX_Reflection>();
                             if (refcam != null) Destroy(refcam.gameObject);
                         }
-                        else if (CameraFX.Resolution > 40)
+                        else if (CameraFX.Resolution > 80)
                             CameraFX.Resolution -= 10;
+                        else if (CameraFX.Quality == 0)
+                            CameraFX.Quality = 1;
                         else if (CameraFX.Bloom)
                             CameraFX.Bloom = false;
+                        else if (CameraFX.Resolution > 60)
+                            CameraFX.Resolution -= 10;
                         else
                             IsRunning = false;
-                    }
 
-                    Debug.Log("Current FPS:" + fps + " Resolution:" + CameraFX.Resolution + " Bloom :" + CameraFX.Bloom);
+                        Debug.Log("Current FPS:" + Fps + " Resolution:" + CameraFX.Resolution + " Quality :" + CameraFX.Quality + " Bloom :" + CameraFX.Bloom);
+                    }
+                    else IsRunning = false;
+
                 }
-                lastfps = fps;
+                lastfps = Fps;
             }
             IsRunning = false;
         }
@@ -60,19 +71,18 @@ namespace SeganX.Effects
             timeCounter += Time.unscaledDeltaTime;
             if (timeCounter >= sampleTime)
             {
-                fps = frameCounter / sampleTime;
+                Fps = frameCounter / sampleTime;
                 timeCounter = 0;
                 frameCounter = 0;
             }
         }
 
-
-        public static bool IsRunning
-        {
-            get; set;
-            //get { return PlayerPrefs.GetInt("CameraFX_Optimizer.IsRunning", 1) > 0; }
-            //set { PlayerPrefs.SetInt("CameraFX_Optimizer.IsRunning", value ? 1 : 0); }
-        }
+        ////////////////////////////////////////////////////////////
+        /// STATIC MEMBERS
+        ////////////////////////////////////////////////////////////
+        public static bool IsRunning { get; set; }
+        public static float Fps { get; set; }
+        public static int Step { get; set; }
 
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace SeganX
+namespace SeganX.DiffieHellman
 {
-    public static class AuthenService
+    public static class Service
     {
         private static Random randomer = new Random(DateTime.Now.Millisecond);
 

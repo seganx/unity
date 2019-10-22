@@ -6,6 +6,8 @@ namespace SeganX
 {
     public abstract class StaticConfig<T> : ScriptableObject where T : StaticConfig<T>
     {
+        public int version = 1;
+
         protected abstract void OnInitialize();
        
 
@@ -46,12 +48,12 @@ namespace SeganX
         protected static void SaveData(object data)
         {
             var json = JsonUtility.ToJson(data);
-            PlayerPrefsEx.SetString(Instance.name, json);
+            PlayerPrefsEx.SetString(Instance.name + instance.version, json);
         }
 
         protected static D LoadData<D>(D defauleObj)
         {
-            var json = PlayerPrefsEx.GetString(Instance.name, string.Empty);
+            var json = PlayerPrefsEx.GetString(Instance.name + instance.version, string.Empty);
             if (json.Length > 5)
                 return JsonUtility.FromJson<D>(json);
             else

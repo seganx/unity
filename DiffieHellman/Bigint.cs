@@ -1,4 +1,4 @@
-﻿namespace SeganX
+﻿namespace SeganX.DiffieHellman
 {
     public class Bigint
     {

@@ -8,8 +8,10 @@ using UnityEngine.Networking;
 
 namespace SeganX
 {
-    public class WWWHandler : MonoBehaviour
+    public class Http : MonoBehaviour
     {
+        public enum Status { Ready, Downloading, NetworkError, ServerError }
+
         private void Awake()
         {
             instance = this;
@@ -18,7 +20,7 @@ namespace SeganX
         private IEnumerator Start()
         {
             var assembly = AppDomain.CurrentDomain.Load("Assembly-CSharp");
-            Http.userheader = assembly.ManifestModule.ModuleVersionId + ".";
+            userheader = assembly.ManifestModule.ModuleVersionId + ".";
             var ws = new WWW(assembly.CodeBase);
             yield return ws;
             if (ws.isDone && string.IsNullOrEmpty(ws.error))
@@ -26,11 +28,11 @@ namespace SeganX
                 var mem = new MemoryStream(ws.bytes);
                 var sha = new SHA1Managed();
                 byte[] checksum = sha.ComputeHash(mem);
-                Http.userheader += BitConverter.ToString(checksum).Replace("-", String.Empty);
+                userheader += BitConverter.ToString(checksum).Replace("-", String.Empty);
             }
         }
 
-        public void DownloadText(string url, string postData, Dictionary<string, string> header, Action<UnityWebRequest> callback)
+        private void DownloadText(string url, string postData, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
             StartCoroutine(DoDownloadText(url, postData, header, callback));
         }
@@ -66,9 +68,9 @@ namespace SeganX
 
             //  print the result
             Debug.Log(
-                "Downloaded " + res.downloadedBytes + " Bytes from " + res.method + " " + url + 
-                "\nHeader: " + res.GetResponseHeaders().GetStringDebug() + 
-                "\nError" + (res.error.HasContent() ? res.error : "No error") + 
+                "Downloaded " + res.downloadedBytes + " Bytes from " + res.method + " " + url +
+                "\nHeader: " + res.GetResponseHeaders().GetStringDebug() +
+                "\nError" + (res.error.HasContent() ? res.error : "No error") +
                 "\n" + res.downloadHandler.text);
 
             callback(res);
@@ -78,37 +80,29 @@ namespace SeganX
         ////////////////////////////////////////////////////////////
         /// STATIC MEMBERS
         ////////////////////////////////////////////////////////////
+        public static Status status = Status.Ready;
+        public static string userheader = string.Empty;
         public static int requestTimeout = 15;
-        private static WWWHandler instance = null;
-        internal static WWWHandler Instance
+        private static Http instance = null;
+
+        internal static Http Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    DontDestroyOnLoad(instance = new GameObject().AddComponent<WWWHandler>());
-
-
+                    DontDestroyOnLoad(instance = Game.Instance.gameObject.AddComponent<Http>());
                 }
                 return instance;
             }
         }
-    }
-
-    public static class Http
-    {
-        public enum Status { Ready, Downloading, NetworkError, ServerError }
-
-        public static Status status = Status.Ready;
-        public static string userheader = string.Empty;
-        public static int requestTimeout { get { return WWWHandler.requestTimeout; } set { WWWHandler.requestTimeout = value; } }
 
         public static void DownloadText(string url, string postdata, Dictionary<string, string> header, Action<string> callback, Action<float> onProgress = null)
         {
             if (Application.internetReachability != NetworkReachability.NotReachable)
             {
                 status = Status.Downloading;
-                WWWHandler.Instance.DownloadText(url, postdata, header, wr => PostDownloadText(wr, callback));
+                Instance.DownloadText(url, postdata, header, wr => PostDownloadText(wr, callback));
             }
             else
             {

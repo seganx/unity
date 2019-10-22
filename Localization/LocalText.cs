@@ -101,7 +101,7 @@ namespace SeganX
             {
                 if (target == null) target = transform.GetComponent<Text>(true, true);
                 DisplayText();
-                //CheckSize();
+                CheckSize();
             }
         }
 #endif

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SeganX
+namespace SeganX.DiffieHellman
 {
-    public static class GameIn_Test
+    public static class Test
     {
         public class GameinHeader
         {
@@ -44,8 +44,8 @@ namespace SeganX
         public static IEnumerator RequestAuthenCode(string uriCode)
         {
             //  prepare diffihelman keys
-            byte[] secretKey = AuthenService.SecretKey(32);
-            byte[] publicKey = AuthenService.PublicKey(secretKey, 7, 23);
+            byte[] secretKey = Service.SecretKey(32);
+            byte[] publicKey = Service.PublicKey(secretKey, 7, 23);
 
             //  spost public key to the server and wait for response
             var ws = PostWWW(uriCode, "mydata", "", publicKey);
@@ -61,7 +61,7 @@ namespace SeganX
             if (LastReceivedHeader.error == "none" && LastReceivedHeader.userdata == "mydata")
             {
                 byte[] rcvd_key = System.Text.Encoding.ASCII.GetBytes(ws.text);
-                FinalKey = AuthenService.FinalKey(secretKey, rcvd_key, 23);
+                FinalKey = Service.FinalKey(secretKey, rcvd_key, 23);
 
                 Debug.Log("Key: " + System.Text.ASCIIEncoding.ASCII.GetString(FinalKey));
             }
@@ -80,7 +80,7 @@ namespace SeganX
                 Debug.Log("sending: " + msg);
 
                 //  encrypt data via final key
-                byte[] endata = AuthenService.Encrypt(System.Text.Encoding.ASCII.GetBytes(msg), FinalKey);
+                byte[] endata = Service.Encrypt(System.Text.Encoding.ASCII.GetBytes(msg), FinalKey);
 
                 //  post encrypted data to the server and wait for response
                 var ws = PostWWW(uriDevice, LastReceivedHeader.userdata, LastReceivedHeader.access, endata);

@@ -352,8 +352,9 @@ public static class TransformEx
 
     public static T GetChild<T>(this Transform self, int index) where T : Component
     {
-        var res = self.GetChild(index).GetComponent<T>();
-        return res == null ? self.GetChild(index).GetComponentInChildren<T>() : res;
+        var tr = self.GetChild(index);
+        var res = tr.GetComponent<T>();
+        return res == null ? tr.GetComponentInChildren<T>() : res;
     }
 
     public static Transform FindRecursive(this Transform self, string childName, bool justActivates = false)

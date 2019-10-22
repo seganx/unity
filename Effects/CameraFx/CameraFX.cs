@@ -72,6 +72,15 @@ namespace SeganX.Effects
                 RenderTexture.active = null;
             }
             else currentCamera.targetTexture = sceneBuffer;
+
+            if (Quality == 0)
+            {
+                Shader.DisableKeyword("SX_SIMPLE");
+            }
+            else
+            {
+                Shader.EnableKeyword("SX_SIMPLE");
+            }
         }
 
         private void OnPostRender()
@@ -218,6 +227,12 @@ namespace SeganX.Effects
         {
             get { return PlayerPrefs.GetInt("CameraFx.Bloom", 1) > 0; }
             set { PlayerPrefs.SetInt("CameraFx.Bloom", value ? 1 : 0); }
+        }
+
+        public static int Quality
+        {
+            get { return PlayerPrefs.GetInt("CameraFx.Quality", 0); }
+            set { PlayerPrefs.SetInt("CameraFx.Quality", value); }
         }
 
 

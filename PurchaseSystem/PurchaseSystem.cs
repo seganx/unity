@@ -1,6 +1,4 @@
-﻿using SeganX;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SeganX
 {
@@ -63,7 +61,7 @@ namespace SeganX
 
         static PurchaseSystem()
         {
-            DontDestroyOnLoad(new GameObject("PurchaseSystem").AddComponent<PurchaseSystem>());
+            DontDestroyOnLoad(Game.Instance.gameObject.AddComponent<PurchaseSystem>());
         }
 
         public static void Initialize(string bazaarKey, string storeUrl, Callback callback)

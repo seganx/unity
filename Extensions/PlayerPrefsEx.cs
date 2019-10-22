@@ -118,37 +118,6 @@ namespace SeganX
                 return JsonUtility.FromJson<T>(json);
             }
             Debug.Log("Deserialize : File not found for " + filename);
-            return DeserializeBinary(key, defaultValue);
-        }
-
-        public static void SerializeBinary(string key, object value)
-        {
-            MemoryStream stream = new MemoryStream();
-            BinaryFormatter fmter = new BinaryFormatter();
-            fmter.Serialize(stream, value);
-            SaveData(key + ".seganx", Encrypt(stream.GetBuffer(), Core.CryptoKey));
-        }
-
-        public static T DeserializeBinary<T>(string key, T defaultValue)
-        {
-            var filename = key + ".seganx";
-            Debug.Log("DeserializeBinary : Try to loading data fram " + filename);
-            byte[] data = LoadData(key + ".seganx");
-            if (data != null && data.Length > 0)
-            {
-                Debug.Log("DeserializeBinary : Data loaded " + data.Length + " size");
-                try
-                {
-                    MemoryStream stream = new MemoryStream(Decrypt(data, Core.CryptoKey));
-                    BinaryFormatter fmter = new BinaryFormatter();
-                    return (T)fmter.Deserialize(stream);
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogWarning("DeserializeBinary: " + e.Message);
-                }
-            }
-            Debug.Log("DeserializeBinary : File not found for " + filename);
             return defaultValue;
         }
 

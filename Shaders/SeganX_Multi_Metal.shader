@@ -62,6 +62,7 @@ Shader "SeganX/Multi/Metal"
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma multi_compile_fog
+                #pragma multi_compile __ SX_OPP SX_SIMPLE
 
                 #include "UnityCG.cginc"
                 #include "Lighting.cginc"
@@ -116,7 +117,6 @@ Shader "SeganX/Multi/Metal"
                 }
 
 
-                fixed  _FillMode;
                 fixed4 _VinylColor;
                 fixed4 _GlossColor;
                 fixed4 _DiffColor1;
@@ -151,9 +151,10 @@ Shader "SeganX/Multi/Metal"
 
                 float4 frag(v2f i) : SV_Target
                 {
-                    clip(_FillMode + i.zdp.x + frac(i.vrtx.x * 0.5f) - i.zdp.y);
-                    clip(_FillMode + i.zdp.x + frac(i.vrtx.y * 0.5f) - i.zdp.y);
-                    //clip(_FillMode + i.zdp.x + frac(i.vrtx.x * 0.5f) - frac(i.vrtx.y * 0.5f) - i.zdp.y);
+#if SX_OPP
+                    clip(i.zdp.x + frac(i.vrtx.x * 0.5f) - i.zdp.y);
+                    clip(i.zdp.x + frac(i.vrtx.y * 0.5f) - i.zdp.y);
+#endif
 
                     //  extract material id from vertex color
                     uint matId = (round(i.colr.r * 255) / 10) - 1;  
@@ -161,14 +162,20 @@ Shader "SeganX/Multi/Metal"
                     // compute parametres based on material id
                     fixed4 diffcolor = matlerp(matId, _DiffColor1, _DiffColor2, _DiffColor3);
                     float reflection = matlerp(matId, _Reflection1, 0, _Reflection3);
+#if !SX_OPP
                     float specpower = matlerp(matId, _SpecularPower1, _SpecularPower2, _SpecularPower3);
                     float specvalue = matlerp(matId, _SpecularAtten1, _SpecularAtten2, _SpecularAtten3);
+#if !SX_SIMPLE
                     float metallic = matlerp(matId, _MetalPower1, _MetalPower2, _MetalPower3);
+#endif
+#endif
 
                     // compute lighting params
                     half3 lightDir = _WorldSpaceLightPos0.xyz;
                     half3 viewDir = normalize(UnityWorldSpaceViewDir(i.wrl));
+#if !SX_OPP
                     float refresnel = 0.27f + 1 - dot(viewDir, i.norm);
+#endif
 
                     // construct basic color
                     float4 res = float4( tex2D( _MainTex, i.uv0 ).rgb * diffcolor.rgb, bloomSpecular );
@@ -190,24 +197,36 @@ Shader "SeganX/Multi/Metal"
                     {
                         float cube = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflect(-viewDir, i.norm)).r;
                         cube *= cube;
+#if SX_OPP || SX_SIMPLE
+                        res.rgb += cube * reflection;
+#else
                         res.a = max(res.a, cube * refresnel * reflection);
                         res.rgb += refresnel * cube * reflection;
+#endif
                     }
 
                     // apply specular
+#if !SX_OPP
                     {
                         float spec = max( 0, dot( i.norm, normalize( lightDir + viewDir ) ) );
 
                         //  layer 1 - gloss color
+#if SX_SIMPLE
+                        res.rgb += _GlossColor.rgb * pow(spec, 10) * specvalue;
+#else
                         res.rgb += _GlossColor.rgb * pow(spec, 10) * specvalue * metallic;
+#endif
 
                         //  layer 2 - specular color
                         res.rgb = lerp( res.rgb, _LightColor0.rgb, clamp( pow(spec, specpower * 2) * specvalue, 0, 1 ) );
+#if !SX_SIMPLE
                         res.a = max(res.a, pow(spec, specpower * 80) * specvalue * 8);
 
                         // layer 3 - metallic 
                         res.rgb += tex2D(_MetalTex, i.uv2).a * metallic * pow(spec, 15);
+#endif
                     }
+#endif
 
                     // apply fog
                     UNITY_APPLY_FOG(i.fogCoord, res);

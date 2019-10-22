@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,18 +15,33 @@ namespace SeganX
 
         private string[] lines = null;
         private string text = string.Empty;
+        private string targetText = null;
         private WaitForSeconds typeDelay = null;
+        private Action onFinish;
 
+        public void Setup(Action onFinish)
+        {
+            this.onFinish = onFinish;
+        }
+
+        public void Skip()
+        {
+            StopAllCoroutines();
+            target.text = text = targetText;
+            if (onFinish != null)
+                onFinish();
+        }
 
         private void Awake()
         {
-            typeDelay = new WaitForSeconds(delayTime);
+            typeDelay = new WaitForSeconds(delayTime * 0.75f);
         }
 
         private void LateUpdate()
         {
             if (text != target.text)
             {
+                targetText = target.text;
                 lines = target.text.Split('\n');
                 target.text = text = string.Empty;
                 StopAllCoroutines();
@@ -51,6 +67,9 @@ namespace SeganX
                     rindex = text.Length;
                 }
             }
+
+            if (onFinish != null)
+                onFinish();
         }
     }
 }

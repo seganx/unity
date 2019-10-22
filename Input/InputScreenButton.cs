@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace SeganX
 {
+    [DefaultExecutionOrder(-100)]
     public class InputScreenButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         public enum Type
@@ -26,14 +27,14 @@ namespace SeganX
         [Tooltip("Select which component of the input will be changed")]
         public Type type = Type.Jump;
 
-        [Tooltip("Image of the button when it is disabled")]
-        public Image disabledImage = null;
+        [Tooltip("GameObject of the button when it is disabled")]
+        public GameObject disabledImage = null;
 
-        [Tooltip("Image of the button when it is normal")]
-        public Image normalImage = null;
+        [Tooltip("GameObject of the button when it is normal")]
+        public GameObject normalImage = null;
 
-        [Tooltip("Image of the button when it pressed")]
-        public Image pressImage = null;
+        [Tooltip("GameObject of the button when it pressed")]
+        public GameObject pressImage = null;
 
         private InputManager.Button button = null;
 
@@ -51,18 +52,15 @@ namespace SeganX
                 case Type.Horn: button = InputManager.Horn; break;
             }
 
-            if (disabledImage) disabledImage.gameObject.SetActive(!intractable);
-            if (normalImage)
-                normalImage.gameObject.SetActive(intractable);
-            if (pressImage)
-                pressImage.gameObject.SetActive(false);
+            if (disabledImage) disabledImage.SetActive(!intractable);
+            if (normalImage) normalImage.SetActive(intractable);
+            if (pressImage) pressImage.SetActive(false);
         }
 
         private void LateUpdate()
         {
-            if (disabledImage) disabledImage.gameObject.SetActive(!intractable);
-            if (normalImage)
-                normalImage.gameObject.SetActive(intractable);
+            if (disabledImage) disabledImage.SetActive(!intractable);
+            if (normalImage) normalImage.SetActive(intractable);
             button.OnLateUpdate();
         }
 
@@ -70,16 +68,14 @@ namespace SeganX
         {
             if (intractable)
             {
-                if (pressImage)
-                    pressImage.gameObject.SetActive(true);
+                if (pressImage) pressImage.SetActive(true);
                 button.OnPointerDown();
             }
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (pressImage)
-                pressImage.gameObject.SetActive(false);
+            if (pressImage) pressImage.SetActive(false);
             button.OnPointerUp();
         }
     }

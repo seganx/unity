@@ -6,7 +6,10 @@ namespace SeganX
     public class TestDevices : StaticConfig<TestDevices>
     {
         [SerializeField] private bool active = false;
+        [Space(50)]
+        [Header("Selected device index")]
         [SerializeField] private int selectedIndex = 0;
+        [Space(50)]
         [Header("List of devices for test")]
         [SerializeField] private string[] deviceList = new string[0];
 
