@@ -4,6 +4,11 @@ using UnityEngine;
 
 namespace SeganX
 {
+    public interface IResource
+    {
+        int Id { get; set; }
+    }
+
     public class ResourceEx : StaticConfig<ResourceEx>
     {
         [System.Serializable]
@@ -80,6 +85,48 @@ namespace SeganX
             {
                 var loaded = Resources.Load<T>(item.path);
                 if (loaded != null) res.Add(loaded);
+            }
+
+            return res;
+        }
+
+
+        public static List<T> LoadAllWithId<T>(string dire, bool subfolders) where T : Object, IResource
+        {
+            var res = new List<T>();
+            var files = subfolders ? Instance.files.FindAll(x => x.dire.Contains(dire)) : Instance.files.FindAll(x => x.dire == dire);
+            if (files.Count == 0) return res;
+
+            files.Sort((x, y) => x.id - y.id);
+            foreach (var item in files)
+            {
+                var loaded = Resources.Load<T>(item.path);
+                if (loaded != null && res.Contains(loaded) == false && loaded is IResource)
+                {
+                    loaded.As<IResource>().Id = item.id;
+                    res.Add(loaded);
+                }
+            }
+
+            return res;
+        }
+
+        public static List<T> LoadAllWithId<T>(string dire, string includes) where T : Object, IResource
+        {
+            var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
+            var res = new List<T>();
+            var files = Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
+            if (files.Count == 0) return res;
+
+            files.Sort((x, y) => x.id - y.id);
+            foreach (var item in files)
+            {
+                var loaded = Resources.Load<T>(item.path);
+                if (loaded != null && loaded is IResource)
+                {
+                    loaded.As<IResource>().Id = item.id;
+                    res.Add(loaded);
+                }
             }
 
             return res;
