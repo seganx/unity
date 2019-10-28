@@ -19,6 +19,7 @@ namespace SeganX
                 public string username = string.Empty;
             }
 
+            // set profile data. pass null or empty parameters to ignore change
             public static void Set(string hash, string privateData, string publicData, System.Action<bool> callback)
             {
                 var post = new Data();
