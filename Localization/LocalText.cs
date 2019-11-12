@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 namespace SeganX
 {
@@ -95,14 +95,10 @@ namespace SeganX
         }
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private void Reset()
         {
-            if (UnityEditor.EditorApplication.isPlaying == false)
-            {
-                if (target == null) target = transform.GetComponent<Text>(true, true);
-                DisplayText();
-                CheckSize();
-            }
+            if (target == null)
+                target = transform.GetComponent<Text>(true, true);
         }
 #endif
 

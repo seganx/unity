@@ -18,7 +18,6 @@
         {
             gameObject.name = GetType().Name;
         }
-
     }
 
 }

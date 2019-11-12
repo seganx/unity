@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Seganx/UI/Background" {
+Shader "Seganx/Albedo/Background" {
 	Properties {
 		_MainTex ("Sprite", 2D) = "white" {}
 		_Queue ("Queue", Int) = 3000

@@ -108,16 +108,12 @@ namespace SeganX
         public static T Deserialize<T>(string key, T defaultValue)
         {
             var filename = EncryptString(key) + ".seganx";
-            Debug.Log("Deserialize : Try to loading data fram " + filename);
             byte[] data = LoadData(filename);
             if (data != null && data.Length > 0)
             {
-                Debug.Log("Deserialize : Data loaded " + data.Length + " size");
                 string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
-                Debug.Log("Deserialize : Json Decrypted " + json);
                 return JsonUtility.FromJson<T>(json);
             }
-            Debug.Log("Deserialize : File not found for " + filename);
             return defaultValue;
         }
 

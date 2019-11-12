@@ -8,10 +8,10 @@ public class UiShowHide : Base
 {
     [SerializeField] private float showDelay = 0;
     [SerializeField] private float showAlpha = 0;
-    [SerializeField] private Vector2 showDirection = Vector3.up;
+    [SerializeField] private Vector2 showDirection = Vector3.zero;
     [SerializeField] private float hideDelay = 0;
     [SerializeField] private float hideAlpha = 0;
-    [SerializeField] private Vector2 hideDirection = Vector3.up;
+    [SerializeField] private Vector2 hideDirection = Vector3.zero;
 
     private Vector2 initPosition = Vector2.zero;
     private BlenderVector2 position = new BlenderVector2() { speed = 10, blendMode = BlenderVector2.BlendMode.Acceleration };

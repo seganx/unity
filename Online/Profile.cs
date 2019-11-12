@@ -12,6 +12,7 @@ namespace SeganX
                 public string password = string.Empty;
                 public string nickname = string.Empty;
                 public string status = string.Empty;
+                public string avatar = string.Empty;
                 public string datahash = string.Empty;
             }
 

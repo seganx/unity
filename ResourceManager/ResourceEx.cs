@@ -179,6 +179,7 @@ namespace SeganX
             foreach (var item in list)
                 AddFile(item);
 
+            Instance.files.Sort((x, y) => x.id - y.id);
             UnityEditor.EditorUtility.SetDirty(Instance);
             UnityEditor.AssetDatabase.SaveAssets();
         }

@@ -34,7 +34,7 @@ namespace SeganX
 
         public bool Update(float deltaTime)
         {
-            if (current != destination)
+            if (!Mathf.Approximately(current.x, destination.x) || !Mathf.Approximately(current.y, destination.y))
             {
                 if (blendMode == BlendMode.StaticSpeed)
                 {
@@ -44,6 +44,9 @@ namespace SeganX
                 {
                     current = Vector2.Lerp(current, destination, speed * deltaTime);
                 }
+
+                if (Mathf.Approximately(current.x, destination.x)) current.x = destination.x;
+                if (Mathf.Approximately(current.y, destination.y)) current.y = destination.y;
                 return true;
             }
             else return false;

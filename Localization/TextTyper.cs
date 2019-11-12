@@ -71,5 +71,11 @@ namespace SeganX
             if (onFinish != null)
                 onFinish();
         }
+
+        private void Reset()
+        {
+            if (target == null)
+                target = transform.GetComponent<Text>(true, true);
+        }
     }
 }

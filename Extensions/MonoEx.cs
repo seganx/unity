@@ -258,8 +258,13 @@ public static class MonoEx
     {
         if (self == null || self.Length < 1) return false;
         for (int i = 0; i < self.Length; i++)
-            if (char.IsLetterOrDigit(self[i]) == false || char.IsSymbol(self[i]) || char.IsControl(self[i]))
+        {
+            var isNotLetter = self[i] != ' ' && char.IsLetterOrDigit(self[i]) == false;
+            var isSymbol = char.IsSymbol(self[i]);
+            var isControl = char.IsControl(self[i]);
+            if (isNotLetter || isSymbol || isControl)
                 return false;
+        }
         return true;
     }
 

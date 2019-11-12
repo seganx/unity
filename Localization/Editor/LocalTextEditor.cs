@@ -42,8 +42,13 @@ namespace SeganX
 
             var rect = EditorGUILayout.GetControlRect();
             var maxWidth = rect.width;
-            rect.width = 100;
-            EditorGUI.PrefixLabel(rect, new GUIContent(local.stringId > 0 ? "Text: " + local.stringId : "Text: unlinked"));
+            if (local.stringId > 0)
+            {
+                rect.width = 150;
+                rect.height *= 2;
+                EditorGUI.HelpBox(rect, "Text linked to " + local.stringId, MessageType.Warning);
+                EditorGUILayout.GetControlRect();
+            }
 
             rect.width = 70;
             rect.x = maxWidth - rect.width;

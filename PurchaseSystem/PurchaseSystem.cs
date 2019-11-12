@@ -150,7 +150,7 @@ namespace SeganX
                 {
                     Debug.Log("Verifying purchase: " + res);
                     lastPurchase = res;
-                    queryCount = 2;
+                    queryCount = 3;
                     BazaarPlugin.BazaarIAB.queryPurchases();
 
                 };

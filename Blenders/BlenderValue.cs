@@ -15,9 +15,10 @@ namespace SeganX
         
         public bool Update(float deltaTime)
         {
-            if (current != destination)
+            if (Mathf.Approximately(current, destination) == false)
             {
                 current = Mathf.Lerp(current, destination, speed * deltaTime);
+                if (Mathf.Approximately(current, destination)) current = destination;
                 return true;
             }
             else return false;

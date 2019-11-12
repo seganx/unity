@@ -1,6 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Seganx/UI/Hidden" {
+Shader "SeganX/UI/Hidden" {
 	Properties {
 		_Queue ("Queue", Int) = 3002
 		
@@ -64,7 +62,7 @@ Shader "Seganx/UI/Hidden" {
 			vs_out vert (vs_in v)
 			{
 				vs_out o;
-				o.pos = UnityObjectToClipPos(v.pos);
+                o.pos = float4(0, 0, 0, 0);
 				return o;
 			}
 
