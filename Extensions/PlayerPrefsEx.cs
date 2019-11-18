@@ -8,6 +8,12 @@ namespace SeganX
 {
     public static class PlayerPrefsEx
     {
+        [System.Serializable]
+        private class ObjectData<T>
+        {
+            public T data = default(T);
+        }
+
         private static byte[] Encrypt(byte[] data, byte[] key)
         {
             var res = new byte[data.Length];
@@ -116,6 +122,28 @@ namespace SeganX
             }
             return defaultValue;
         }
+
+        public static void SetObject<T>(string key, T value)
+        {
+            var tmp = new ObjectData<T>();
+            tmp.data = value;
+            var json = JsonUtility.ToJson(tmp);
+            SaveData(EncryptString(key) + ".seganx", Encrypt(json.GetBytes(), Core.CryptoKey));
+        }
+
+        public static T GetObject<T>(string key, T defaultValue)
+        {
+            var filename = EncryptString(key) + ".seganx";
+            byte[] data = LoadData(filename);
+            if (data != null && data.Length > 0)
+            {
+                string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
+                var tmp = JsonUtility.FromJson<ObjectData<T>>(json);
+                return tmp.data;
+            }
+            return defaultValue;
+        }
+
 
         public static void Delete(string key)
         {

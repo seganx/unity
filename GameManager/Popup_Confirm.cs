@@ -16,25 +16,42 @@ public class Popup_Confirm : GameState
 
     private System.Action<bool> callbackFunc = null;
 
-    public Popup_Confirm Setup(int stringId, bool displayOkButton, System.Action<bool> callback)
+    public Popup_Confirm Setup(bool displayOkButton, bool displayCancelButton, System.Action<bool> callback)
     {
-        return Setup(LocalizationService.Get(stringId), displayOkButton, callback);
-    }
+        callbackFunc = callback;
+        okButton.gameObject.SetActive(displayOkButton);
+        cancelButton.gameObject.SetActive(displayCancelButton);
+        okButton.onClick.AddListener(() => Close(true));
+        cancelButton.onClick.AddListener(() => Close(false));
 
-    public Popup_Confirm Setup(string desc, bool displayOkButton, System.Action<bool> callback)
-    {
         if (displayOkButton)
         {
             var botEdge = descLabel.rectTransform.GetEdge(RectTransform.Edge.Bottom);
             descLabel.rectTransform.SetEdge(RectTransform.Edge.Bottom, botEdge + buttonSize);
         }
 
-        callbackFunc = callback;
-        okButton.gameObject.SetActive(displayOkButton);
-        okButton.onClick.AddListener(() => Close(true));
-        cancelButton.onClick.AddListener(() => Close(false));
-        descLabel.SetText(desc, false, LocalizationService.IsPersian);
         return this;
+    }
+
+    public Popup_Confirm SetText(int stringId, params object[] args)
+    {
+        return SetText(LocalizationService.Get(stringId), args);
+    }
+
+    public Popup_Confirm SetText(string desc, params object[] args)
+    {
+        descLabel.SetTextAndWrap(args == null ? desc : string.Format(desc, args), false, LocalizationService.IsPersian);
+        return this;
+    }
+
+    public Popup_Confirm Setup(int stringId, bool displayOkButton, bool displayCancelButton, System.Action<bool> callback)
+    {
+        return Setup(LocalizationService.Get(stringId), displayOkButton, displayCancelButton, callback);
+    }
+
+    public Popup_Confirm Setup(string desc, bool displayOkButton, bool displayCancelButton, System.Action<bool> callback)
+    {
+        return Setup(displayOkButton, displayCancelButton, callback).SetText(desc);
     }
 
     private void Start()

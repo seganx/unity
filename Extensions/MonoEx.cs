@@ -367,6 +367,12 @@ public static class MonoEx
         return self.Count - 1;
     }
 
+    public static List<T> Shuffle<T>(this List<T> self)
+    {
+        self.Sort((x, y) => Random.Range(-1, 2));
+        return self;
+    }
+
     public static T LastOne<T>(this List<T> self)
     {
         return self[self.Count - 1];
