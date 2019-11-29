@@ -228,6 +228,8 @@ Shader "SeganX/Multi/Metal"
                     }
 #endif
 
+                    res.rgb *= _LightColor0.a;
+
                     // apply fog
                     UNITY_APPLY_FOG(i.fogCoord, res);
 

@@ -160,7 +160,7 @@ namespace SeganX
 
         private static void PostDownloadText(WWW ws, Action<string> callback)
         {
-            if (ws.isDone && ws.responseHeaders["STATUS"].Contains("200"))
+            if (ws.isDone && ws.responseHeaders != null && ws.responseHeaders.ContainsKey("STATUS") && ws.responseHeaders["STATUS"].Contains("200"))
             {
                 status = Status.Ready;
                 callback(ws.text.GetWithoutBOM());

@@ -50,6 +50,9 @@ namespace SeganX
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             position.height /= 2;
+            EditorGUI.LabelField(position, label);
+            position.x += EditorGUIUtility.labelWidth - EditorGUIUtility.fieldWidth;
+            position.width -= EditorGUIUtility.labelWidth - EditorGUIUtility.fieldWidth;
             property.stringValue = EditorGUI.TextArea(position, property.stringValue);
             position.y += position.height;
             EditorGUI.LabelField(position, property.stringValue.CleanFromCode().CleanForPersian().Persian(forcePersian), style);

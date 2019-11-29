@@ -11,7 +11,7 @@ namespace SeganX
         [System.Serializable]
         private class ObjectData<T>
         {
-            public T data = default(T);
+            public T obj = default(T);
         }
 
         private static byte[] Encrypt(byte[] data, byte[] key)
@@ -126,7 +126,7 @@ namespace SeganX
         public static void SetObject<T>(string key, T value)
         {
             var tmp = new ObjectData<T>();
-            tmp.data = value;
+            tmp.obj = value;
             var json = JsonUtility.ToJson(tmp);
             SaveData(EncryptString(key) + ".seganx", Encrypt(json.GetBytes(), Core.CryptoKey));
         }
@@ -139,7 +139,7 @@ namespace SeganX
             {
                 string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
                 var tmp = JsonUtility.FromJson<ObjectData<T>>(json);
-                return tmp.data;
+                return tmp.obj;
             }
             return defaultValue;
         }

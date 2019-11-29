@@ -138,6 +138,7 @@
                         res.a = max(res.a, pow(spec, 8));
                     }                    
 
+                    res.rgb *= _LightColor0.a;
                     UNITY_APPLY_FOG(i.fogCoord, res);
                     return res;
                 }

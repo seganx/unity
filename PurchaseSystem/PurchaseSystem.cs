@@ -114,13 +114,13 @@ namespace SeganX
 
         }
 
-        public static void Consume()
+        public static void Consume(string sku)
         {
             switch (purchaseProvider)
             {
                 case PurchaseProvider.Bazaar:
 #if BAZAAR
-                    Bazaar.Consume();
+                    Bazaar.Consume(sku);
 #endif
                     break;
 
@@ -138,9 +138,6 @@ namespace SeganX
 #if BAZAAR
         private static class Bazaar
         {
-            private static int queryCount = 0;
-            private static BazaarPlugin.BazaarPurchase lastPurchase = null;
-
             public static void Initialize(string key)
             {
                 BazaarPlugin.IABEventManager.billingSupportedEvent = () => callbackCaller.Call(IsBazaarSupported = true, string.Empty);
@@ -149,10 +146,9 @@ namespace SeganX
                 BazaarPlugin.IABEventManager.purchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Verifying purchase: " + res);
-                    lastPurchase = res;
-                    queryCount = 3;
-                    BazaarPlugin.BazaarIAB.queryPurchases();
-
+                    var isValid = res.DeveloperPayload == Core.Salt;
+                    Debug.Log("Purchase verification result: " + isValid);
+                    callbackCaller.Call(isValid, res.PurchaseToken);
                 };
 
                 BazaarPlugin.IABEventManager.purchaseFailedEvent = (error) =>
@@ -161,34 +157,14 @@ namespace SeganX
                     callbackCaller.Call(false, error);
                 };
 
-                BazaarPlugin.IABEventManager.queryPurchasesSucceededEvent = (list) =>
-                {
-                    if (lastPurchase != null)
-                    {
-                        var isValid = list.Exists(x => x.Signature == lastPurchase.Signature && x.DeveloperPayload == Core.Salt);
-                        Debug.Log("Purchase verification result: " + isValid);
-                        callbackCaller.Call(isValid, lastPurchase.PurchaseToken);
-                    }
-                };
-
-                BazaarPlugin.IABEventManager.queryPurchasesFailedEvent = (error) =>
-                {
-                    if (lastPurchase != null && queryCount-- > 0)
-                        BazaarPlugin.BazaarIAB.queryPurchases();
-                    else
-                        queryCount = 0;
-                };
-
                 BazaarPlugin.IABEventManager.consumePurchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Consume succeeded: " + res);
-                    lastPurchase = null;
                 };
 
                 BazaarPlugin.IABEventManager.consumePurchaseFailedEvent = (error) =>
                 {
                     Debug.LogError("Consume failed: " + error);
-                    lastPurchase = null;
                 };
 
                 BazaarPlugin.BazaarIAB.init(key);
@@ -196,18 +172,13 @@ namespace SeganX
 
             public static void Purchase(string sku)
             {
-                if (lastPurchase == null)
-                {
-                    Debug.Log("Purchase started for " + sku);
-                    BazaarPlugin.BazaarIAB.purchaseProduct(sku, Core.Salt);
-                }
-                else Consume();
+                Debug.Log("Purchase started for " + sku);
+                BazaarPlugin.BazaarIAB.purchaseProduct(sku, Core.Salt);
             }
 
-            public static void Consume()
+            public static void Consume(string sku)
             {
-                if (lastPurchase == null) return;
-                BazaarPlugin.BazaarIAB.consumeProduct(lastPurchase.ProductId);
+                BazaarPlugin.BazaarIAB.consumeProduct(sku);
             }
         }
 #endif

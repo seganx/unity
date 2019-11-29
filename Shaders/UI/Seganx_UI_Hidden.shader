@@ -1,5 +1,6 @@
 Shader "SeganX/UI/Hidden" {
 	Properties {
+        _MainTex("Sprite", 2D) = "white" {}
 		_Queue ("Queue", Int) = 3002
 		
 		[Enum(ON,1,OFF,0)]	_ZWrite ("Z Write", Int) = 0

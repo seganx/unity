@@ -18,6 +18,9 @@ public class UiShowHide : Base
     private BlenderValue alpha = new BlenderValue() { speed = 5 };
     private CanvasGroup canvasGroup = null;
 
+    private float delayTime = 0;
+    private System.Action showhideFunc = null;
+
     public override bool Visible
     {
         get
@@ -55,13 +58,6 @@ public class UiShowHide : Base
         alpha.Setup(showAlpha);
     }
 
-    private void Start()
-    {
-        if (canvasGroup.interactable)
-            Show();
-    }
-
-    // Update is called once per frame
     private void Update()
     {
         if (position.Update(Time.deltaTime))
@@ -69,26 +65,42 @@ public class UiShowHide : Base
 
         if (alpha.Update(Time.deltaTime))
             canvasGroup.alpha = alpha.current;
+
+        if (showhideFunc != null)
+        {
+            delayTime -= Time.deltaTime;
+            if (delayTime <= 0)
+            {
+                showhideFunc();
+                showhideFunc = null;
+            }
+        }
     }
 
     public void Show()
     {
         canvasGroup.interactable = true;
-        DelayCall(showDelay, () =>
+        delayTime = showDelay;
+        showhideFunc = null;
+        showhideFunc = () =>
         {
+            canvasGroup.blocksRaycasts = true;
             position.destination = initPosition;
             alpha.destination = 1;
-        });
+        };
     }
 
     public float Hide()
     {
         canvasGroup.interactable = false;
-        DelayCall(hideDelay, () =>
+        delayTime = hideDelay;
+        showhideFunc = null;
+        showhideFunc = () =>
         {
+            canvasGroup.blocksRaycasts = false;
             position.destination = initPosition + hideDirection * 500;
             alpha.destination = hideAlpha;
-        });
+        };
         return hideDelay + 0.5f;
     }
 

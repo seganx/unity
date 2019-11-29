@@ -82,7 +82,7 @@ namespace SeganX
                 if (timer != null)
                     return Mathf.FloorToInt(timer.startTime - CurrentSeconds + timer.duration);
                 else
-                    return 1;
+                    return 0;
             }
 
             public static DateTime UnixTimeToLocalTime(long date)
