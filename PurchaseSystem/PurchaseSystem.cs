@@ -146,9 +146,10 @@ namespace SeganX
                 BazaarPlugin.IABEventManager.purchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Verifying purchase: " + res);
-                    var isValid = res.DeveloperPayload == Core.Salt;
-                    Debug.Log("Purchase verification result: " + isValid);
-                    callbackCaller.Call(isValid, res.PurchaseToken);
+                    if (res.DeveloperPayload == Core.Salt)
+                        Online.Purchase.Validate(Core.GameId, Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == Core.Salt, res.PurchaseToken));
+                    else
+                        callbackCaller.Call(false, res.PurchaseToken);
                 };
 
                 BazaarPlugin.IABEventManager.purchaseFailedEvent = (error) =>

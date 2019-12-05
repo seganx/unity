@@ -13,6 +13,7 @@ namespace SeganX
             public string salt = string.Empty;
         }
 
+        [SerializeField] private int gameId = 0;
         [SerializeField] private string onlineDomain = "seganx.ir";
         [SerializeField] private SecurityOptions securityOptions = new SecurityOptions();
 
@@ -46,6 +47,7 @@ namespace SeganX
         public static string DeviceId { get { return Instance.deviceId; } }
         public static string Salt { get { return Instance.hashsalt; } }
         public static byte[] CryptoKey { get { return Instance.cryptoKey; } }
+        public static int GameId { get { return Instance.gameId; } }
         public static string OnlineDomain { get { return Instance.onlineDomain; } }
 
         private static string ComputeMD5(string str, string salt)

@@ -8,6 +8,7 @@ namespace SeganX
     [RequireComponent(typeof(ParticleSystem))]
     public class UIParticleSystem : MaskableGraphic
     {
+        public Shader hiddenShader = null;
         public Texture particleTexture;
         public Sprite particleSprite;
 
@@ -94,7 +95,7 @@ namespace SeganX
             // automatically set material to UI/Particles/Hidden shader, and get previous texture
             if (setParticleSystemMaterial)
             {
-                Material material = new Material(Shader.Find("SeganX/UI/Hidden"));
+                Material material = new Material(hiddenShader);
                 if (Application.isPlaying)
                 {
                     renderer.material = material;
@@ -287,6 +288,12 @@ namespace SeganX
             {
                 SetAllDirty();
             }
+        }
+
+        protected override void OnValidate()
+        {
+            if (hiddenShader == null)
+                hiddenShader = Shader.Find("SeganX/UI/Hidden");
         }
 #endif
     }
