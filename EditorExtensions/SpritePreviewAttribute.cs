@@ -20,9 +20,6 @@ namespace SeganX
     [CustomPropertyDrawer(typeof(SpritePreviewAttribute))]
     public class SpritePreviewAttributeDrawer : PropertyDrawer
     {
-        private static Texture2D s_currentTexture = null;
-        private static Texture2D s_currentTextureConverted = null;
-
         private float baseHeight;
         private float previewHeight;
 
@@ -50,25 +47,7 @@ namespace SeganX
                 position.x += EditorGUIUtility.labelWidth;
                 position.width -= EditorGUIUtility.labelWidth;
                 position.height = previewHeight;
-
-                var sprite = property.objectReferenceValue.As<Sprite>();
-                if (s_currentTextureConverted == null || s_currentTexture != sprite.texture)
-                {
-                    s_currentTexture = sprite.texture;
-                    s_currentTextureConverted = new Texture2D(s_currentTexture.width, s_currentTexture.height, TextureFormat.ARGB32, false);
-                    Graphics.ConvertTexture(s_currentTexture, 0, s_currentTextureConverted, 0);
-                }
-
-                var texture = new Texture2D((int)sprite.rect.width, (int)sprite.rect.height, TextureFormat.ARGB32, false);
-                try
-                {
-                    Graphics.CopyTexture(s_currentTextureConverted, 0, 0, (int)sprite.rect.x, (int)sprite.rect.y, texture.width, texture.height, texture, 0, 0, 0, 0);
-                }
-                catch
-                {
-                    s_currentTextureConverted = null;
-                }
-                EditorGUI.LabelField(position, new GUIContent() { image = texture });
+                DrawTexturePreview(position, property.objectReferenceValue.As<Sprite>());
             }
         }
 

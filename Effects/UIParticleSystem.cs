@@ -144,6 +144,9 @@ namespace SeganX
         {
             base.Awake();
 
+            if (hiddenShader == null)
+                hiddenShader = Shader.Find("SeganX/UI/Hidden");
+
             if (!Initialize())
             {
                 enabled = false;
@@ -290,8 +293,10 @@ namespace SeganX
             }
         }
 
+
         protected override void OnValidate()
         {
+            base.OnValidate();
             if (hiddenShader == null)
                 hiddenShader = Shader.Find("SeganX/UI/Hidden");
         }

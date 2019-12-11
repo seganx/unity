@@ -36,7 +36,6 @@ namespace SeganX
             }
         }
 
-
         public void Update()
         {
             if (callbackCaller.invoke)
@@ -56,7 +55,6 @@ namespace SeganX
 
         private static string StoreUrl { get; set; }
         public static bool IsInitialized { get; private set; }
-        public static bool IsBazaarSupported { get; private set; }
         public static PurchaseProvider LastProvider { get { return purchaseProvider; } }
 
         static PurchaseSystem()
@@ -90,9 +88,9 @@ namespace SeganX
             {
 #if BAZAAR
                 case PurchaseProvider.Bazaar:
-                    if (IsBazaarSupported)
+                    if (Bazaar.Supported)
                     {
-                        Bazaar.Purchase(sku);
+                        Online.Purchase.Start(Online.Purchase.Provider.Cafebazaar, () => Bazaar.Purchase(sku));                        
                     }
                     else
                     {
@@ -138,16 +136,19 @@ namespace SeganX
 #if BAZAAR
         private static class Bazaar
         {
+            public static bool Supported { get; private set; }
+
             public static void Initialize(string key)
             {
-                BazaarPlugin.IABEventManager.billingSupportedEvent = () => callbackCaller.Call(IsBazaarSupported = true, string.Empty);
-                BazaarPlugin.IABEventManager.billingNotSupportedEvent = (error) => callbackCaller.Call(IsBazaarSupported = false, error);
+                Supported = true;
+                BazaarPlugin.IABEventManager.billingSupportedEvent = () => callbackCaller.Call(Supported = true, string.Empty);
+                BazaarPlugin.IABEventManager.billingNotSupportedEvent = (error) => callbackCaller.Call(Supported = false, error);
 
                 BazaarPlugin.IABEventManager.purchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Verifying purchase: " + res);
                     if (res.DeveloperPayload == Core.Salt)
-                        Online.Purchase.Validate(Core.GameId, Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == Core.Salt, res.PurchaseToken));
+                        Online.Purchase.End(Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == Core.Salt, res.PurchaseToken));
                     else
                         callbackCaller.Call(false, res.PurchaseToken);
                 };

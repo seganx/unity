@@ -41,25 +41,26 @@ namespace SeganX
 
         public static T Load<T>(string dire, int id) where T : Object
         {
-            var file = Instance.files.Find(x => x.dire.Contains(dire) && x.id == id);
+            var file = Instance.files.Find(x => IsSimilarPath(x.dire, dire) && x.id == id);
             return file != null ? Resources.Load<T>(file.path) : default(T);
         }
 
         public static List<File> LoadAll(string dire, string includes)
         {
             var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
-            return Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
+            return Instance.files.FindAll(x => IsSimilarPath(x.dire, dire) && x.tags.Exists(y => arr.Contains(y)));
         }
 
         public static List<File> LoadAll(string dire, bool subfolders)
         {
-            return subfolders ? Instance.files.FindAll(x => x.dire.Contains(dire)) : Instance.files.FindAll(x => x.dire == dire);
+            if (dire.EndsWith("/") == false) dire += '/';
+            return subfolders ? Instance.files.FindAll(x => IsSimilarPath(x.dire, dire)) : Instance.files.FindAll(x => x.dire == dire);
         }
 
         public static List<T> LoadAll<T>(string dire, bool subfolders) where T : Object
         {
             var res = new List<T>();
-            var files = subfolders ? Instance.files.FindAll(x => x.dire.Contains(dire)) : Instance.files.FindAll(x => x.dire == dire);
+            var files = subfolders ? Instance.files.FindAll(x => IsSimilarPath(x.dire, dire)) : Instance.files.FindAll(x => x.dire == dire);
             if (files.Count == 0) return res;
 
             files.Sort((x, y) => x.id - y.id);
@@ -77,7 +78,7 @@ namespace SeganX
         {
             var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
             var res = new List<T>();
-            var files = Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
+            var files = Instance.files.FindAll(x => IsSimilarPath(x.dire, dire) && x.tags.Exists(y => arr.Contains(y)));
             if (files.Count == 0) return res;
 
             files.Sort((x, y) => x.id - y.id);
@@ -94,7 +95,7 @@ namespace SeganX
         public static List<T> LoadAllWithId<T>(string dire, bool subfolders) where T : Object, IResource
         {
             var res = new List<T>();
-            var files = subfolders ? Instance.files.FindAll(x => x.dire.Contains(dire)) : Instance.files.FindAll(x => x.dire == dire);
+            var files = subfolders ? Instance.files.FindAll(x => IsSimilarPath(x.dire, dire)) : Instance.files.FindAll(x => x.dire == dire);
             if (files.Count == 0) return res;
 
             files.Sort((x, y) => x.id - y.id);
@@ -115,7 +116,7 @@ namespace SeganX
         {
             var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
             var res = new List<T>();
-            var files = Instance.files.FindAll(x => x.dire.Contains(dire) && x.tags.Exists(y => arr.Contains(y)));
+            var files = Instance.files.FindAll(x => IsSimilarPath(x.dire, dire) && x.tags.Exists(y => arr.Contains(y)));
             if (files.Count == 0) return res;
 
             files.Sort((x, y) => x.id - y.id);
@@ -136,6 +137,13 @@ namespace SeganX
         ////////////////////////////////////////////////////////////
         /// STATIC HELPER FUNCTIONS
         ////////////////////////////////////////////////////////////
+        private static bool IsSimilarPath(string path, string str)
+        {
+            if (path == null || path.Length < 0) return false;
+            var index = path.IndexOf(str, System.StringComparison.OrdinalIgnoreCase);
+            return index == 0;
+        }
+
 #if UNITY_EDITOR
         private static void AddFile(string filepath)
         {
