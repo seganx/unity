@@ -10,7 +10,7 @@ namespace SeganX
             public class Data
             {
                 public long start_time = 0;
-                public long duration = 0;
+                public long duration = 1;
                 public int score = 0;
                 public int rank = 0;
                 public int end_score = 0;

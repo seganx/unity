@@ -81,7 +81,7 @@ namespace SeganX
             else yield return new WaitUntil(() => res.isDone || (Time.time - ret) > requestTimeout);
 
             if (res.isDone)
-                Debug.Log("Received " + res.bytesDownloaded + " bytes from " + url + ":\n" + res.text);
+                Debug.Log("Received " + res.bytesDownloaded + " bytes from " + url + ":\nHeader:" + res.responseHeaders.GetStringDebug() + "\n" + res.text);
             else
                 Debug.Log("Failed to download from " + url);
             callback(res);

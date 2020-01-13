@@ -105,35 +105,18 @@ namespace SeganX
             return tmp == defaultValue ? tmp : DecryptString(tmp);
         }
 
-        public static void Serialize(string key, object value)
-        {
-            var json = JsonUtility.ToJson(value);
-            SaveData(EncryptString(key) + ".seganx", Encrypt(json.GetBytes(), Core.CryptoKey));
-        }
-
-        public static T Deserialize<T>(string key, T defaultValue)
-        {
-            var filename = EncryptString(key) + ".seganx";
-            byte[] data = LoadData(filename);
-            if (data != null && data.Length > 0)
-            {
-                string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
-                return JsonUtility.FromJson<T>(json);
-            }
-            return defaultValue;
-        }
-
         public static void SetObject<T>(string key, T value)
         {
             var tmp = new ObjectData<T>();
             tmp.obj = value;
             var json = JsonUtility.ToJson(tmp);
-            SaveData(EncryptString(key) + ".seganx", Encrypt(json.GetBytes(), Core.CryptoKey));
+            var filename = EncryptString(key).Replace('+', '_').Replace('-', '_').Replace('=', '_') + ".seganx";
+            SaveData(filename, Encrypt(json.GetBytes(), Core.CryptoKey));
         }
 
         public static T GetObject<T>(string key, T defaultValue)
         {
-            var filename = EncryptString(key) + ".seganx";
+            var filename = EncryptString(key).Replace('+', '_').Replace('-', '_').Replace('=', '_') + ".seganx";
             byte[] data = LoadData(filename);
             if (data != null && data.Length > 0)
             {

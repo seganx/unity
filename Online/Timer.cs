@@ -60,7 +60,7 @@ namespace SeganX
             public static DateTime CurrentTime { get { return DateTime.Now + deltaTime; } }
             public static long CurrentSeconds { get { return CurrentTime.Ticks / TimeSpan.TicksPerSecond; } }
 
-            public static void SetTimer(int timerId, float duration, long startTime = 0)
+            public static void Set(int timerId, float duration, long startTime = 0)
             {
                 var timer = data.Find(x => x.id == timerId);
                 if (timer == null)
@@ -76,13 +76,26 @@ namespace SeganX
                 Save();
             }
 
-            public static int GetRemainSeconds(int timerId)
+            public static int GetRemainSeconds(int timerId, float duration)
             {
                 var timer = data.Find(x => x.id == timerId);
-                if (timer != null)
-                    return Mathf.FloorToInt(timer.startTime - CurrentSeconds + timer.duration);
-                else
-                    return 0;
+                if (timer == null)
+                {
+                    Set(timerId, duration);
+                    timer = data.Find(x => x.id == timerId);
+                }
+
+                return Mathf.FloorToInt(timer.startTime - CurrentSeconds + timer.duration);
+            }
+
+            public static bool Exist(int timerId)
+            {
+                return data.Exists(x => x.id == timerId);
+            }
+
+            public static void Remove(int timerId)
+            {
+                data.RemoveAll(x => x.id == timerId);
             }
 
             public static DateTime UnixTimeToLocalTime(long date)
@@ -113,7 +126,7 @@ namespace SeganX
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void InitializeTimer()
         {
-            Timer.Init();                
+            Timer.Init();
         }
     }
 }

@@ -94,12 +94,16 @@ namespace SeganX
             instance.Play(index, volume, fadeInTime, fadeOutTime);
         }
 
-        public static void PlayRandom(int fromIndex, int ToIndex, float volume = 0.2f, float fadeInTime = 1, float fadeOutTime = 1)
+        public static void PlayRandom(int fromIndex, int toIndex, float volume = 0.2f, float fadeInTime = 1, float fadeOutTime = 1)
         {
-            var index = Random.Range(fromIndex, ToIndex + 1) % instance.musics.Length;
+            fromIndex = Mathf.Clamp(fromIndex, 0, instance.musics.Length - 1);
+            toIndex = Mathf.Clamp(toIndex, 0, instance.musics.Length - 1);
+
+            var index = lastRandomIndex;
             while (index == lastRandomIndex)
-                index = Random.Range(fromIndex, ToIndex + 1) % instance.musics.Length;
+                index = Random.Range(fromIndex, toIndex + 1);
             lastRandomIndex = index;
+
             instance.Play(index, volume, fadeInTime, fadeOutTime);
         }
     }
