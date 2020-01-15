@@ -6,18 +6,19 @@ namespace SeganX
 {
     public class UIVerticalOptimizer : MonoBehaviour
     {
-        //private RectTransform parentOfParent = null;
+        [SerializeField] private bool manageChild = true;
+
+        private RectTransform rectTransform = null;
         private RectTransform parent = null;
 
         private void Start()
         {
-            parent = transform.parent.AsRectTransform();
-            //parentOfParent = parent.parent.AsRectTransform();
+            rectTransform = transform as RectTransform;
+            parent = transform.parent as RectTransform;
         }
 
         private void Update()
         {
-
             for (int i = 0; i < transform.childCount; i++)
             {
                 var t = transform.GetChild(i).AsRectTransform();
@@ -25,10 +26,13 @@ namespace SeganX
                 var top = t.anchoredPosition.y;
                 var bot = top - t.rect.height;
 
-                var topVisible = bot + parent.anchoredPosition.y < 0;
-                var botVisible = top + parent.anchoredPosition.y + parent.rect.height > 0;
+                var topVisible = bot + rectTransform.anchoredPosition.y < 0;
+                var botVisible = top + rectTransform.anchoredPosition.y + parent.rect.height > 0;
 
-                t.gameObject.SetActive(topVisible && botVisible);
+                if (manageChild)
+                    t.transform.SetChilderenActive(topVisible && botVisible);
+                else
+                    t.gameObject.SetActive(topVisible && botVisible);
             }
         }
     }

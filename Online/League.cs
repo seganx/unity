@@ -29,6 +29,13 @@ namespace SeganX
             }
 
             [System.Serializable]
+            public class Leaderboard
+            {
+                public List<Profile> last = new List<Profile>();
+                public List<Profile> current = new List<Profile>();
+            }
+
+            [System.Serializable]
             private class Id
             {
                 public int id = 0;
@@ -43,7 +50,7 @@ namespace SeganX
             }
 
             [System.Serializable]
-            private class Leaderboard : Id
+            private class LeaderboardRequest : Id
             {
                 public int from = 0;
                 public int count = 0;
@@ -59,7 +66,7 @@ namespace SeganX
             private static int cacheDataDuration = 30;
             private static List<Cache<Data>> cacheData = new List<Cache<Data>>();
             private static int cacheLeaderboardDuration = 300;
-            private static List<Cache<List<Profile>>> cacheLeaderboard = new List<Cache<List<Profile>>>();
+            private static List<Cache<Leaderboard>> cacheLeaderboard = new List<Cache<Leaderboard>>();
 
             public static void SetScore(int id, int score, int value, string hash, System.Action<bool, int> callback)
             {
@@ -91,16 +98,16 @@ namespace SeganX
 
             }
 
-            public static void GetLeaderboard(int id, int from, int count, System.Action<bool, List<Profile>> callback)
+            public static void GetLeaderboard(int id, int from, int count, System.Action<bool, Leaderboard> callback)
             {
                 var cache = GetLeaderboardFromCache(id);
                 if (cache == null)
                 {
-                    var post = new Leaderboard();
+                    var post = new LeaderboardRequest();
                     post.id = id;
                     post.from = from;
                     post.count = count;
-                    DownloadData<List<Profile>>("league-get-leaderboard.php", post, (success, data) => callback(success, AddToChache(id, data)));
+                    DownloadData<Leaderboard>("league-get-leaderboard.php", post, (success, data) => callback(success, AddToChache(id, data)));
                 }
                 else callback(true, cache);
             }
@@ -123,9 +130,17 @@ namespace SeganX
                 cacheLeaderboard.Clear();
             }
 
+            private static System.DateTime UnixTimeToLocalTime(long date)
+            {
+                var res = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                res = res.AddSeconds(date);
+                return res.ToLocalTime();
+            }
+
             private static Data AddToChache(int id, Data data)
             {
                 if (data == null) return data;
+                data.start_time = UnixTimeToLocalTime(data.start_time).Ticks / System.TimeSpan.TicksPerSecond;
                 var res = new Cache<Data>();
                 res.id = id;
                 res.cacheTime = System.DateTime.Now;
@@ -146,10 +161,10 @@ namespace SeganX
                 return res.data;
             }
 
-            private static List<Profile> AddToChache(int id, List<Profile> data)
+            private static Leaderboard AddToChache(int id, Leaderboard data)
             {
                 if (data == null) return data;
-                var res = new Cache<List<Profile>>();
+                var res = new Cache<Leaderboard>();
                 res.id = id;
                 res.cacheTime = System.DateTime.Now;
                 res.data = data;
@@ -157,7 +172,7 @@ namespace SeganX
                 return data;
             }
 
-            private static List<Profile> GetLeaderboardFromCache(int id)
+            private static Leaderboard GetLeaderboardFromCache(int id)
             {
                 var res = cacheLeaderboard.Find(x => x.id == id);
                 if (res == null) return null;

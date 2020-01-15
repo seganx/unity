@@ -144,6 +144,14 @@ public static class TransformEx
         return self;
     }
 
+    //! this will disable/enable all children 
+    public static Transform SetChilderenActive(this Transform self, bool active)
+    {
+        for (int i = 0; i < self.childCount; i++)
+            self.GetChild(i).gameObject.SetActive(active);
+        return self;
+    }
+
     //! this will disable all children but activate a child specified by index
     public static Transform SetActiveChild(this Transform self, int index)
     {
