@@ -40,6 +40,72 @@ namespace SeganX
             return System.Text.Encoding.UTF8.GetString(Decrypt(System.Convert.FromBase64String(value), Core.CryptoKey));
         }
 
+        public static string EncryptName(string value)
+        {
+            return EncryptString(value).Replace('+', '_').Replace('/', '_').Replace('=', '_');
+        }
+
+        public static void SetInt(string key, int value)
+        {
+            PlayerPrefs.SetInt(EncryptName(key), value);
+        }
+
+        public static int GetInt(string key, int defaultValue)
+        {
+            return PlayerPrefs.GetInt(EncryptName(key), defaultValue);
+        }
+
+        public static void SetFloat(string key, float value)
+        {
+            PlayerPrefs.SetFloat(EncryptName(key), value);
+        }
+
+        public static float GetFloat(string key, float defaultValue)
+        {
+            return PlayerPrefs.GetFloat(EncryptName(key), defaultValue);
+        }
+
+        public static void SetString(string key, string value)
+        {
+            PlayerPrefs.SetString(EncryptName(key), EncryptString(value));
+        }
+
+        public static string GetString(string key, string defaultValue)
+        {
+            var tmp = PlayerPrefs.GetString(EncryptName(key), defaultValue);
+            return tmp == defaultValue ? tmp : DecryptString(tmp);
+        }
+
+        public static void SetObject<T>(string key, T value)
+        {
+            var tmp = new ObjectData<T>();
+            tmp.obj = value;
+            var json = JsonUtility.ToJson(tmp);
+            var filename = EncryptName(key) + ".seganx";
+            SaveData(filename, Encrypt(json.GetBytes(), Core.CryptoKey));
+        }
+
+        public static T GetObject<T>(string key, T defaultValue)
+        {
+            var filename = EncryptName(key) + ".seganx";
+            byte[] data = LoadData(filename);
+
+            // last version compatiblity
+            if (data == null || data.Length < 1)
+            {
+                filename = EncryptString(key) + ".seganx";
+                data = LoadData(filename);
+            }
+
+            if (data != null && data.Length > 0)
+            {
+                string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
+                var tmp = JsonUtility.FromJson<ObjectData<T>>(json);
+                return tmp.obj;
+            }
+            return defaultValue;
+        }
+
         public static void SaveData(string path, byte[] data)
         {
             path = Application.persistentDataPath + "/" + path;
@@ -74,67 +140,13 @@ namespace SeganX
             return res;
         }
 
-        public static void SetInt(string key, int value)
-        {
-            PlayerPrefs.SetInt(EncryptString(key), value);
-        }
-
-        public static int GetInt(string key, int defaultValue)
-        {
-            return PlayerPrefs.GetInt(EncryptString(key), defaultValue);
-        }
-
-        public static void SetFloat(string key, float value)
-        {
-            PlayerPrefs.SetFloat(EncryptString(key), value);
-        }
-
-        public static float GetFloat(string key, float defaultValue)
-        {
-            return PlayerPrefs.GetFloat(EncryptString(key), defaultValue);
-        }
-
-        public static void SetString(string key, string value)
-        {
-            PlayerPrefs.SetString(EncryptString(key), EncryptString(value));
-        }
-
-        public static string GetString(string key, string defaultValue)
-        {
-            var tmp = PlayerPrefs.GetString(EncryptString(key), defaultValue);
-            return tmp == defaultValue ? tmp : DecryptString(tmp);
-        }
-
-        public static void SetObject<T>(string key, T value)
-        {
-            var tmp = new ObjectData<T>();
-            tmp.obj = value;
-            var json = JsonUtility.ToJson(tmp);
-            var filename = EncryptString(key).Replace('+', '_').Replace('-', '_').Replace('=', '_') + ".seganx";
-            SaveData(filename, Encrypt(json.GetBytes(), Core.CryptoKey));
-        }
-
-        public static T GetObject<T>(string key, T defaultValue)
-        {
-            var filename = EncryptString(key).Replace('+', '_').Replace('-', '_').Replace('=', '_') + ".seganx";
-            byte[] data = LoadData(filename);
-            if (data != null && data.Length > 0)
-            {
-                string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
-                var tmp = JsonUtility.FromJson<ObjectData<T>>(json);
-                return tmp.obj;
-            }
-            return defaultValue;
-        }
-
-
         public static void Delete(string key)
         {
             var path = Application.persistentDataPath + "/" + key + ".seganx";
             if (File.Exists(path))
                 File.Delete(path);
             else
-                PlayerPrefs.DeleteKey(EncryptString(key));
+                PlayerPrefs.DeleteKey(EncryptName(key));
         }
 
         public static void ClearData()

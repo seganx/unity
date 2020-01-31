@@ -44,17 +44,18 @@ namespace SeganX
             lines = attribute.As<PersianPreviewAttribute>().lines;
             forcePersian = attribute.As<PersianPreviewAttribute>().force;
             if (lines < 1) lines = 1;
-            return baseHeight * lines * 2;
+            return baseHeight * lines * 2 + baseHeight;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            position.height /= 2;
+            var height = (position.height - baseHeight) / 2;
+            position.height = baseHeight;
             EditorGUI.LabelField(position, label);
-            position.x += EditorGUIUtility.labelWidth - EditorGUIUtility.fieldWidth;
-            position.width -= EditorGUIUtility.labelWidth - EditorGUIUtility.fieldWidth;
+            position.y += baseHeight;
+            position.height = height;
             property.stringValue = EditorGUI.TextArea(position, property.stringValue);
-            position.y += position.height;
+            position.y += height;
             EditorGUI.LabelField(position, property.stringValue.CleanFromCode().CleanForPersian().Persian(forcePersian), style);
         }
     }

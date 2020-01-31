@@ -53,6 +53,18 @@ namespace SeganX
             {
                 if (provider == Provider.Cafebazaar)
                 {
+                    Verify(provider, sku, token, callback);
+                }
+                else if (provider == Provider.Gateway)
+                {
+
+                }
+            }
+
+            public static void Verify(Provider provider, string sku, string token, System.Action<bool, string> callback)
+            {
+                if (provider == Provider.Cafebazaar)
+                {
                     if (bazaar_access_token.HasContent())
                     {
                         var url = "https://pardakht.cafebazaar.ir/devapi/v2/api/validate/" + Application.identifier + "/inapp/" + sku + "/purchases/" + token + "/";
@@ -75,9 +87,10 @@ namespace SeganX
                 }
                 else if (provider == Provider.Gateway)
                 {
-
+                    
                 }
             }
+
         }
     }
 }
