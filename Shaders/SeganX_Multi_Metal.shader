@@ -218,7 +218,7 @@ Shader "SeganX/Multi/Metal"
 #endif
 
                         //  layer 2 - specular color
-                        res.rgb = lerp( res.rgb, _LightColor0.rgb, clamp( pow(spec, specpower * 2) * specvalue, 0, 1 ) );
+                        res.rgb = lerp( res.rgb, 1, clamp( pow(spec, specpower * 2) * specvalue, 0, 1 ) );
 #if !SX_SIMPLE
                         res.a = max(res.a, pow(spec, specpower * 80) * specvalue * 8);
 
