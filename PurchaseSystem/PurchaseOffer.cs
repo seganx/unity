@@ -40,9 +40,9 @@ namespace SeganX
             }
         }
 
-        public static void Setup(int startIndex, int maxIndex, int offerDurationSeconds, int cooltimeSeconds, int minResource, int minResourceSeconds, int lastPurchaseSeconds)
+        public static void Setup(int startIndex, int count, int offerDurationSeconds, int cooltimeSeconds, int minResource, int minResourceSeconds, int lastPurchaseSeconds)
         {
-            Config.maxIndex = maxIndex;
+            Config.maxIndex = count - 1;
             Config.startIndex = startIndex;
             Config.coolTime = cooltimeSeconds;
             Config.minResource = minResource;
@@ -53,9 +53,6 @@ namespace SeganX
 
         public static int GetOfferIndex(int resource)
         {
-            if (IsTimeToShow(resource) == false)
-                return -1;
-
             // check if offer exist
             if (Online.Timer.Exist(offerTimerId))
             {
@@ -65,24 +62,20 @@ namespace SeganX
 
                 // it seems that the player just did not purchased
                 Online.Timer.Remove(offerTimerId);
-                if (Config.Index == 0)
-                {
-                    Online.Timer.Remove(coolTimerId);
-                    Online.Timer.Remove(resourceTimerId);
-                    Online.Timer.Remove(purchaseTimerId);
-                    return -1;
-                }
-                else
-                {
+                Online.Timer.Remove(resourceTimerId);
+
+                if (Config.Index > 0)
                     Config.Index--;
-                    return Config.Index;
-                }
+                else
+                    Online.Timer.Remove(coolTimerId);
             }
-            else
+
+            if (IsTimeToShow(resource))
             {
                 Online.Timer.Set(offerTimerId, Config.offerDuration);
                 return Config.Index;
             }
+            return -1;
         }
 
         public static void SetPurchaseResult(bool success)
@@ -101,23 +94,36 @@ namespace SeganX
         private static bool IsTimeToShow(int resource)
         {
             // check cool time
-            if (Online.Timer.GetRemainSeconds(coolTimerId, Config.coolTime) > 0) return false;
+            if (Online.Timer.GetRemainSeconds(coolTimerId, Config.coolTime) > 0)
+            {
+                Debug.LogWarning("IsTimeToShow : canceled by cool time");
+                return false;
+            }
 
             // check resource leaks
             if (Online.Timer.Exist(resourceTimerId))
             {
                 if (Online.Timer.GetRemainSeconds(resourceTimerId, Config.resourceTime) <= 0)
+                {
+                    Debug.LogWarning("IsTimeToShow : accept by resource timer");
                     return true;
+                }
             }
             else if (resource < Config.minResource)
             {
                 Online.Timer.Set(resourceTimerId, Config.resourceTime);
+                Debug.LogWarning("IsTimeToShow : resource timer started");
+                return false;
             }
 
             // check last purchase
-            if (Online.Timer.GetRemainSeconds(-100003, Config.lastPurchaseTime) <= 0)
+            if (Online.Timer.GetRemainSeconds(purchaseTimerId, Config.lastPurchaseTime) <= 0)
+            {
+                Debug.LogWarning("IsTimeToShow : accept by purchase timer");
                 return true;
+            }
 
+            Debug.LogWarning("IsTimeToShow : just returned false");
             return false;
         }
     }

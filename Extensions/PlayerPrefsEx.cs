@@ -90,19 +90,24 @@ namespace SeganX
             var filename = EncryptName(key) + ".seganx";
             byte[] data = LoadData(filename);
 
-            // last version compatiblity
-            if (data == null || data.Length < 1)
-            {
-                filename = EncryptString(key) + ".seganx";
-                data = LoadData(filename);
-            }
-
             if (data != null && data.Length > 0)
             {
                 string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
                 var tmp = JsonUtility.FromJson<ObjectData<T>>(json);
                 return tmp.obj;
             }
+            else // last version compatiblity
+            {
+                filename = EncryptString(key) + ".seganx";
+                data = LoadData(filename);
+
+                if (data != null && data.Length > 0)
+                {
+                    string json = System.Text.Encoding.UTF8.GetString(Decrypt(data, Core.CryptoKey));
+                    return JsonUtility.FromJson<T>(json);
+                }
+            }
+
             return defaultValue;
         }
 

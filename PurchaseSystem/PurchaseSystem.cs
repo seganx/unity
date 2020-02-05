@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace SeganX
 {
@@ -90,7 +91,7 @@ namespace SeganX
                 case PurchaseProvider.Bazaar:
                     if (Bazaar.Supported)
                     {
-                        Online.Purchase.Start(Online.Purchase.Provider.Cafebazaar, () => Bazaar.Purchase(sku));                        
+                        Online.Purchase.Start(Online.Purchase.Provider.Cafebazaar, () => Bazaar.Purchase(sku));
                     }
                     else
                     {
@@ -112,8 +113,10 @@ namespace SeganX
 
         }
 
-        public static void Consume(string sku)
+        public static void Consume(string sku, Callback callback)
         {
+            callbackCaller.Setup(callback);
+
             switch (purchaseProvider)
             {
                 case PurchaseProvider.Bazaar:
@@ -132,6 +135,35 @@ namespace SeganX
         ////////////////////////////////////////////////////////////////////////////////////////////
         //  implementations
         ////////////////////////////////////////////////////////////////////////////////////////////
+        public static class Payload
+        {
+            private static List<string> list = new List<string>();
+
+            static Payload()
+            {
+                list = PlayerPrefsEx.GetObject("PurchaseSystem.Payload.list", new List<string>());
+            }
+
+            public static string Get(string salt)
+            {
+                var res = System.DateTime.Now.Ticks.ToString().ComputeMD5(salt);
+                list.Add(res);
+                PlayerPrefsEx.SetObject("PurchaseSystem.Payload.list", list);
+                return res;
+            }
+
+            public static bool IsValid(string payload)
+            {
+                return list.IndexOf(payload) >= 0;
+            }
+
+            public static bool Remove(string payload)
+            {
+                var res = IsValid(payload);
+                list.Remove(payload);
+                return res;
+            }
+        }
 
 #if BAZAAR
         private static class Bazaar
@@ -141,14 +173,15 @@ namespace SeganX
             public static void Initialize(string key)
             {
                 Supported = true;
+
                 BazaarPlugin.IABEventManager.billingSupportedEvent = () => callbackCaller.Call(Supported = true, string.Empty);
                 BazaarPlugin.IABEventManager.billingNotSupportedEvent = (error) => callbackCaller.Call(Supported = false, error);
 
                 BazaarPlugin.IABEventManager.purchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Verifying purchase: " + res);
-                    if (res.DeveloperPayload == Core.Salt)
-                        Online.Purchase.End(Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == Core.Salt, res.PurchaseToken));
+                    if (Payload.IsValid(res.DeveloperPayload))
+                        Online.Purchase.End(Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == res.DeveloperPayload, res.PurchaseToken));
                     else
                         callbackCaller.Call(false, res.PurchaseToken);
                 };
@@ -162,11 +195,13 @@ namespace SeganX
                 BazaarPlugin.IABEventManager.consumePurchaseSucceededEvent = (res) =>
                 {
                     Debug.Log("Consume succeeded: " + res);
+                    callbackCaller.Call(Payload.Remove(res.DeveloperPayload), res.PurchaseToken);
                 };
 
                 BazaarPlugin.IABEventManager.consumePurchaseFailedEvent = (error) =>
                 {
                     Debug.LogError("Consume failed: " + error);
+                    callbackCaller.Call(false, error);
                 };
 
                 BazaarPlugin.BazaarIAB.init(key);
@@ -175,7 +210,7 @@ namespace SeganX
             public static void Purchase(string sku)
             {
                 Debug.Log("Purchase started for " + sku);
-                BazaarPlugin.BazaarIAB.purchaseProduct(sku, Core.Salt);
+                BazaarPlugin.BazaarIAB.purchaseProduct(sku, Payload.Get(Core.Salt));
             }
 
             public static void Consume(string sku)
