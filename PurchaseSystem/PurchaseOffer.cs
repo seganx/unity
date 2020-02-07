@@ -6,10 +6,10 @@ namespace SeganX
 {
     public static class PurchaseOffer
     {
-        private const int coolTimerId = -100001;
-        private const int offerTimerId = -100002;
-        private const int resourceTimerId = -100003;
-        private const int purchaseTimerId = -100004;
+        private const int coolTimerId = -200001;
+        private const int offerTimerId = -200002;
+        private const int resourceTimerId = -200003;
+        private const int purchaseTimerId = -200004;
 
         private static class Config
         {
@@ -95,35 +95,24 @@ namespace SeganX
         {
             // check cool time
             if (Online.Timer.GetRemainSeconds(coolTimerId, Config.coolTime) > 0)
-            {
-                Debug.LogWarning("IsTimeToShow : canceled by cool time");
                 return false;
-            }
 
             // check resource leaks
             if (Online.Timer.Exist(resourceTimerId))
             {
                 if (Online.Timer.GetRemainSeconds(resourceTimerId, Config.resourceTime) <= 0)
-                {
-                    Debug.LogWarning("IsTimeToShow : accept by resource timer");
                     return true;
-                }
             }
             else if (resource < Config.minResource)
             {
                 Online.Timer.Set(resourceTimerId, Config.resourceTime);
-                Debug.LogWarning("IsTimeToShow : resource timer started");
                 return false;
             }
 
             // check last purchase
             if (Online.Timer.GetRemainSeconds(purchaseTimerId, Config.lastPurchaseTime) <= 0)
-            {
-                Debug.LogWarning("IsTimeToShow : accept by purchase timer");
                 return true;
-            }
 
-            Debug.LogWarning("IsTimeToShow : just returned false");
             return false;
         }
     }

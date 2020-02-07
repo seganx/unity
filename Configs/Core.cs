@@ -25,11 +25,11 @@ namespace SeganX
         protected override void OnInitialize()
         {
 #if UNITY_EDITOR
-            baseDeviceId = TestDevices.DeviceId;
+            baseDeviceId = deviceId = TestDevices.DeviceId;
 #else
             baseDeviceId = SystemInfo.deviceUniqueIdentifier;
-#endif
             deviceId = ComputeMD5(baseDeviceId, securityOptions.salt);
+#endif
             hashsalt = ComputeMD5(securityOptions.salt, securityOptions.salt);
             cryptoKey = System.Text.Encoding.ASCII.GetBytes(securityOptions.cryptokey);
 
