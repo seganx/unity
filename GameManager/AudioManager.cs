@@ -73,7 +73,7 @@ namespace SeganX
             {
                 if (currentSource != null)
                 {
-                    currentSource.source.volume = currentSource.initVolume * value * 0.01f;
+                    currentSource.source.volume = currentSource.initVolume * value * 0.005f;
                 }
                 PlayerPrefs.SetInt("GameSettings.MusicVolume", value);
             }

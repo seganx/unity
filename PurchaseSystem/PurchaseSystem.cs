@@ -161,6 +161,7 @@ namespace SeganX
             {
                 var res = IsValid(payload);
                 list.Remove(payload);
+                PlayerPrefsEx.SetObject("PurchaseSystem.Payload.list", list);
                 return res;
             }
         }

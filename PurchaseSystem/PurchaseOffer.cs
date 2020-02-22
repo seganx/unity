@@ -6,6 +6,7 @@ namespace SeganX
 {
     public static class PurchaseOffer
     {
+        private const int firstDelayTimerId = -200000;
         private const int coolTimerId = -200001;
         private const int offerTimerId = -200002;
         private const int resourceTimerId = -200003;
@@ -15,7 +16,8 @@ namespace SeganX
         {
             public static int startIndex = 4;
             public static int maxIndex = 2;
-            public static int coolTime = 24 * 60 * 60;
+            public static int firstDelay = 24 * 60 * 60;
+            public static int coolTime = 48 * 60 * 60;
             public static int minResource = 2400;
             public static int resourceTime = 3 * 60 * 60;
             public static int offerDuration = 24 * 60 * 60;
@@ -40,10 +42,11 @@ namespace SeganX
             }
         }
 
-        public static void Setup(int startIndex, int count, int offerDurationSeconds, int cooltimeSeconds, int minResource, int minResourceSeconds, int lastPurchaseSeconds)
+        public static void Setup(int startIndex, int count, int firstDelaySeconds, int offerDurationSeconds, int cooltimeSeconds, int minResource, int minResourceSeconds, int lastPurchaseSeconds)
         {
             Config.maxIndex = count - 1;
             Config.startIndex = startIndex;
+            Config.firstDelay = firstDelaySeconds;
             Config.coolTime = cooltimeSeconds;
             Config.minResource = minResource;
             Config.offerDuration = offerDurationSeconds;
@@ -63,11 +66,10 @@ namespace SeganX
                 // it seems that the player just did not purchased
                 Online.Timer.Remove(offerTimerId);
                 Online.Timer.Remove(resourceTimerId);
+                Online.Timer.Set(coolTimerId, Config.coolTime);
 
                 if (Config.Index > 0)
                     Config.Index--;
-                else
-                    Online.Timer.Remove(coolTimerId);
             }
 
             if (IsTimeToShow(resource))
@@ -82,8 +84,9 @@ namespace SeganX
         {
             if (success)
             {
-                Online.Timer.Remove(coolTimerId);
+                Online.Timer.Remove(offerTimerId);
                 Online.Timer.Remove(resourceTimerId);
+                Online.Timer.Set(coolTimerId, Config.coolTime);
                 Online.Timer.Set(purchaseTimerId, Config.lastPurchaseTime);
 
                 if (Config.Index < Config.maxIndex)
@@ -94,7 +97,11 @@ namespace SeganX
         private static bool IsTimeToShow(int resource)
         {
             // check cool time
-            if (Online.Timer.GetRemainSeconds(coolTimerId, Config.coolTime) > 0)
+            if (Online.Timer.GetRemainSeconds(firstDelayTimerId, Config.firstDelay) > 0)
+                return false;
+
+            // check cool time
+            if (Online.Timer.Exist(coolTimerId) && Online.Timer.GetRemainSeconds(coolTimerId, Config.coolTime) > 0)
                 return false;
 
             // check resource leaks

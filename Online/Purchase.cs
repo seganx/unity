@@ -17,6 +17,14 @@ namespace SeganX
             }
 
             [System.Serializable]
+            private class EndPost
+            {
+                public string token = string.Empty;
+                public string sku = string.Empty;
+                public string payload = string.Empty;
+            }
+
+            [System.Serializable]
             private class BazaarValidation
             {
                 public string developerPayload = string.Empty;
@@ -53,7 +61,16 @@ namespace SeganX
             {
                 if (provider == Provider.Cafebazaar)
                 {
-                    Verify(provider, sku, token, callback);
+                    Verify(provider, sku, token, (success, payload) =>
+                    {
+                        callback(success, payload);
+
+                        var post = new EndPost();
+                        post.sku = sku;
+                        post.token = token;
+                        post.payload = payload;
+                        DownloadData<string>("purchase-end.php", post, (done, msg) => { });
+                    });
                 }
                 else if (provider == Provider.Gateway)
                 {
@@ -87,7 +104,7 @@ namespace SeganX
                 }
                 else if (provider == Provider.Gateway)
                 {
-                    
+
                 }
             }
 
