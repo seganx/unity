@@ -94,7 +94,10 @@ namespace SeganX
                         {
                             Http.requestTimeout = timeOut;
                             var res = JsonUtility.FromJson<BazaarValidation>(resjson);
-                            callback(res.purchaseTime > 0, res.developerPayload);
+                            if (res != null)
+                                callback(res.purchaseTime > 0, res.developerPayload);
+                            else
+                                callback(false, "Bazaar not respond!");
                         });
                     }
                     else

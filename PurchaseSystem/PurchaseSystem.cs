@@ -10,6 +10,18 @@ namespace SeganX
         Gateway = 3
     }
 
+    [System.Serializable]
+    public class PurchasedData
+    {
+        [System.Serializable]
+        public class PurchasedDetail
+        {
+            public string sku = string.Empty;
+            public string token = string.Empty;
+        }
+        public List<PurchasedDetail> list = new List<PurchasedDetail>();
+    }
+
     public class PurchaseSystem : MonoBehaviour
     {
         public delegate void Callback(bool success, string msg);
@@ -128,7 +140,24 @@ namespace SeganX
                 case PurchaseProvider.Gateway:
                     break;
             }
+        }
 
+        public static void QueryPurchases(PurchaseProvider provider, Callback callback)
+        {
+            purchaseProvider = provider;
+            callbackCaller.Setup(callback);
+
+            switch (purchaseProvider)
+            {
+                case PurchaseProvider.Bazaar:
+#if BAZAAR
+                    Bazaar.QueryPurchases();
+#endif
+                    break;
+
+                case PurchaseProvider.Gateway:
+                    break;
+            }
         }
 
 
@@ -195,13 +224,33 @@ namespace SeganX
 
                 BazaarPlugin.IABEventManager.consumePurchaseSucceededEvent = (res) =>
                 {
-                    Debug.Log("Consume succeeded: " + res);
+                    Debug.Log("Consume succeed: " + res);
                     callbackCaller.Call(Payload.Remove(res.DeveloperPayload), res.PurchaseToken);
                 };
 
                 BazaarPlugin.IABEventManager.consumePurchaseFailedEvent = (error) =>
                 {
                     Debug.LogError("Consume failed: " + error);
+                    callbackCaller.Call(false, error);
+                };
+
+                BazaarPlugin.IABEventManager.queryPurchasesSucceededEvent = (purchases) =>
+                {
+                    Debug.LogError("Query purachses succeed: " + purchases.Count);
+                    var res = new PurchasedData();
+                    foreach (var item in purchases)
+                    {
+                        if (item.PurchaseState == BazaarPlugin.BazaarPurchase.BazaarPurchaseState.Purchased)
+                        {
+                            res.list.Add(new PurchasedData.PurchasedDetail() { sku = item.ProductId, token = item.PurchaseToken });
+                        }
+                    }
+                    callbackCaller.Call(true, JsonUtility.ToJson(res));
+                };
+
+                BazaarPlugin.IABEventManager.queryPurchasesFailedEvent = (error) =>
+                {
+                    Debug.LogError("Query purachses Failed: " + error);
                     callbackCaller.Call(false, error);
                 };
 
@@ -216,7 +265,14 @@ namespace SeganX
 
             public static void Consume(string sku)
             {
+                Debug.Log("Consume started for " + sku);
                 BazaarPlugin.BazaarIAB.consumeProduct(sku);
+            }
+
+            public static void QueryPurchases()
+            {
+                Debug.Log("Query purchases started!");
+                BazaarPlugin.BazaarIAB.queryPurchases();
             }
         }
 #endif

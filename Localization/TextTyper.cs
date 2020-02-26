@@ -16,7 +16,7 @@ namespace SeganX
         private string[] lines = null;
         private string text = string.Empty;
         private string targetText = null;
-        private WaitForSeconds typeDelay = null;
+        private WaitForSecondsRealtime typeDelay = null;
         private Action onFinish;
 
         public void Setup(Action onFinish)
@@ -34,7 +34,7 @@ namespace SeganX
 
         private void Awake()
         {
-            typeDelay = new WaitForSeconds(delayTime * 0.75f);
+            typeDelay = new WaitForSecondsRealtime(delayTime * 0.75f);
         }
 
         private void LateUpdate()

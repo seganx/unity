@@ -41,7 +41,7 @@ namespace SeganX
             currentSource.source.Play();
             currentSource.initVolume = volume;
 
-            var targetVolume = volume * MusicVolume * 0.01f;
+            var targetVolume = volume * MusicVolume * 0.005f;
             while (currentSource.source.volume < targetVolume)
             {
                 currentSource.source.volume = Mathf.MoveTowards(currentSource.source.volume, targetVolume, Time.deltaTime / fadeInTime);
@@ -64,7 +64,12 @@ namespace SeganX
         //////////////////////////////////////////////////////////////
         private static AudioManager instance = null;
         private static MusicSource currentSource = new MusicSource();
-        private static int lastRandomIndex = -1;
+
+        private static int lastRandomIndex
+        {
+            get { return PlayerPrefs.GetInt("AudioManager.lastRandomIndex", -1); }
+            set { PlayerPrefs.SetInt("AudioManager.lastRandomIndex", value); }
+        }
 
         public static int MusicVolume
         {
