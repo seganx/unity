@@ -31,7 +31,7 @@ namespace SeganX
 
             public static void Get(System.Action<bool, string, string> callback)
             {
-                DownloadData<Data>("data-get.php", null, (success, res) => callback(success, res.private_data, res.public_data));
+                DownloadData<Data>("data-get.php", null, (success, res) => callback(success, res != null ? res.private_data : null, res != null ? res.public_data : null));
             }
 
             public static void GetPublic(string username, System.Action<bool, string> callback)

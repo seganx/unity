@@ -26,24 +26,37 @@ namespace SeganX
 
         private static void DownloadData<T>(string uri, object post, System.Action<bool, T> callback)
         {
-            Http.DownloadText("http://" +Core.OnlineDomain + "/games/api/" + uri, post == null ? null : JsonUtility.ToJson(post), header, resjson =>
-            {
-                if (resjson != null)
-                {
-                    var res = JsonUtility.FromJson<Response<T>>(resjson);
-                    if (res.msg != Message.ok)
-                    {
-                        error = res.msg;
-                        callback(false, res.data);
-                    }
-                    else callback(true, res.data);
-                }
-                else
-                {
-                    error = Message.TranslateHttp(Http.status);
-                    callback(false, default(T));
-                }
-            });
+            Http.DownloadText("http://" + Core.OnlineDomain + "/games/api/" + uri, post == null ? null : JsonUtility.ToJson(post), header, resjson =>
+             {
+                 if (resjson != null)
+                 {
+                     Response<T> res = null;
+                     try
+                     {
+                         res = JsonUtility.FromJson<Response<T>>(resjson);
+                     }
+                     catch (System.Exception e)
+                     {
+                         error = e.Message;
+                     }
+
+                     if (res != null)
+                     {
+                         if (res.msg != Message.ok)
+                         {
+                             error = res.msg;
+                             callback(false, res.data);
+                         }
+                         else callback(true, res.data);
+                     }
+                     else callback(false, default(T));
+                 }
+                 else
+                 {
+                     error = Message.TranslateHttp(Http.status);
+                     callback(false, default(T));
+                 }
+             });
         }
 
 

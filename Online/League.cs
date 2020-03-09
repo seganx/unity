@@ -92,7 +92,7 @@ namespace SeganX
                 {
                     var post = new Id();
                     post.id = id;
-                    DownloadData<Data>("league-get.php", post, (success, data) => callback(success, AddToChache(id, data)));
+                    DownloadData<Data>("league-get.php", post, (success, data) => callback(success, success ? AddToChache(id, data) : new Data()));
                 }
                 else callback(true, cache);
 
@@ -107,7 +107,7 @@ namespace SeganX
                     post.id = id;
                     post.from = from;
                     post.count = count;
-                    DownloadData<Leaderboard>("league-get-leaderboard.php", post, (success, data) => callback(success, AddToChache(id, data)));
+                    DownloadData<Leaderboard>("league-get-leaderboard.php", post, (success, data) => callback(success, success ? AddToChache(id, data) : new Leaderboard()));
                 }
                 else callback(true, cache);
             }
