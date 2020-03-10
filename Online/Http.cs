@@ -136,7 +136,7 @@ namespace SeganX
         {
             get
             {
-                if (instance == null)
+                if (instance == null && Game.Instance)
                 {
                     DontDestroyOnLoad(instance = Game.Instance.gameObject.AddComponent<Http>());
                 }

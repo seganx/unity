@@ -19,6 +19,7 @@ namespace SeganX
         private void Awake()
         {
             instance = this;
+            AudioListener.volume = SoundVolume * 0.01f;
         }
 
         public void Play(int index, float volume, float fadeInTime, float fadeOutTime)

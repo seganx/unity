@@ -55,7 +55,10 @@ namespace SeganX
             {
                 callbackCaller.invoke = false;
                 if (callbackCaller.callbackFunc != null)
+                {
                     callbackCaller.callbackFunc(callbackCaller.success, callbackCaller.msg);
+                    callbackCaller.Setup(null);
+                }
             }
         }
 
@@ -75,17 +78,16 @@ namespace SeganX
             DontDestroyOnLoad(Game.Instance.gameObject.AddComponent<PurchaseSystem>());
         }
 
-        public static void Initialize(string bazaarKey, string storeUrl, Callback callback)
+        public static void Initialize(string bazaarKey, string storeUrl)
         {
             StoreUrl = storeUrl;
             if (IsInitialized == false)
             {
-                callbackCaller.Setup(callback);
+                IsInitialized = true;
 #if BAZAAR
                 Bazaar.Initialize(bazaarKey);
 #endif
             }
-            else callback(true, string.Empty);
         }
 
         public static void Purchase(PurchaseProvider provider, string sku, Callback callback)
@@ -204,8 +206,8 @@ namespace SeganX
             {
                 Supported = true;
 
-                BazaarPlugin.IABEventManager.billingSupportedEvent = () => callbackCaller.Call(Supported = true, string.Empty);
-                BazaarPlugin.IABEventManager.billingNotSupportedEvent = (error) => callbackCaller.Call(Supported = false, error);
+                BazaarPlugin.IABEventManager.billingSupportedEvent = () => Supported = true;
+                BazaarPlugin.IABEventManager.billingNotSupportedEvent = (error) => Supported = false;
 
                 BazaarPlugin.IABEventManager.purchaseSucceededEvent = (res) =>
                 {
