@@ -8,14 +8,16 @@ namespace SeganX
             [System.Serializable]
             private class Data
             {
+                public int version = 0;
                 public int gems = 0;
                 public int skill = 0;
                 public int level = 0;
             }
 
-            public static void Set(int gems, int skill, int level, System.Action<bool> callback)
+            public static void Set(int version, int gems, int skill, int level, System.Action<bool> callback)
             {
                 var post = new Data();
+                post.version = version;
                 post.gems = gems;
                 post.skill = skill;
                 post.level = level;

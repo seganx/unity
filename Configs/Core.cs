@@ -9,8 +9,8 @@ namespace SeganX
         [System.Serializable]
         public class SecurityOptions
         {
-            public string cryptokey = string.Empty;
-            public string salt = string.Empty;
+            public string cryptokey = "replace crypto key here";
+            public string salt = "replace salt";
         }
 
         [SerializeField] private int gameId = 0;

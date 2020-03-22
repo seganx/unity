@@ -4,21 +4,22 @@ using UnityEngine;
 
 namespace SeganX
 {
-    public class GameManager<G> : Base where G : Component
+    public abstract class GameManager : MonoBehaviour
     {
-        public string prefabPath = "Menus/";
-        public Canvas canvas = null;
+        [SerializeField] private string prefabPath = "Menus/";
+        [SerializeField] private Canvas canvas = null;
 
         private GameState currentState = null;
-        private List<System.Type> stateStack = new List<System.Type>();
-        private List<GameState> guiStack = new List<GameState>();
-
-        public GameState CurrentPopup { get { return guiStack.Count > 0 ? guiStack[0] : null; } }
-        public GameState CurrentState { get { return currentState; } }
-        public bool IsEmpty { get { return currentState == null && CurrentPopup == null && stateStack.Count < 1; } }
+        private List<System.Type> typeStack = new List<System.Type>();
+        private List<GameState> stateStack = new List<GameState>();
 
         public System.Action<GameState> OnBackButton = new System.Action<GameState>(x => { });
         public System.Action<GameState> OnOpenState = new System.Action<GameState>(x => { });
+
+        public bool IsEmpty { get { return currentState == null && CurrentPopup == null && typeStack.Count < 1; } }
+        public Canvas Canvas { get { return canvas; } }
+        public GameState CurrentPopup { get { return stateStack.Count > 0 ? stateStack[0] : null; } }
+        public GameState CurrentState { get { return currentState; } }
 
         public T OpenState<T>(bool resetStack = false) where T : GameState
         {
@@ -32,11 +33,12 @@ namespace SeganX
             if (currentState != null)
             {
                 var delay = currentState.PreClose();
+                
                 Destroy(currentState.gameObject, delay);
             }
 
-            if (resetStack) stateStack.Clear();
-            stateStack.Insert(0, typeof(T));
+            if (resetStack) typeStack.Clear();
+            typeStack.Insert(0, typeof(T));
             currentState = Instantiate<GameState>(state);
             currentState.name = state.name;
             AttachState(currentState);
@@ -46,15 +48,15 @@ namespace SeganX
             return currentState as T;
         }
 
-        private GameState CloseState()
+        private GameState CloseCurrentState()
         {
-            if (stateStack.Count < 2) return currentState;
+            if (typeStack.Count < 2) return currentState;
 
-            stateStack.RemoveAt(0);
+            typeStack.RemoveAt(0);
             var delay = currentState.PreClose();
             Destroy(currentState.gameObject, delay);
 
-            var state = Resources.Load<GameState>(prefabPath + stateStack[0].Name);
+            var state = Resources.Load<GameState>(prefabPath + typeStack[0].Name);
             currentState = Instantiate(state) as GameState;
             currentState.name = state.name;
             AttachState(currentState);
@@ -69,7 +71,7 @@ namespace SeganX
             if (prefab == null) return null;
             T res = Instantiate<GameObject>(prefab).GetComponent<T>();
             res.name = prefab.name;
-            guiStack.Insert(0, res);
+            stateStack.Insert(0, res);
             Resources.UnloadUnusedAssets();
             AttachState(res);
             OnOpenState(res);
@@ -89,7 +91,7 @@ namespace SeganX
 
         public bool ClosePopup(GameState popup)
         {
-            if (popup != null && guiStack.Remove(popup))
+            if (popup != null && stateStack.Remove(popup))
             {
                 var delay = popup.PreClose();
                 Destroy(popup.gameObject, delay);
@@ -101,12 +103,12 @@ namespace SeganX
         //  close current popup window and return the remains opened popup
         public int ClosePopup(bool closeAll = false)
         {
-            if (guiStack.Count < 1) return 0;
-            ClosePopup(guiStack[0]);
-            return closeAll ? ClosePopup(closeAll) : guiStack.Count;
+            if (stateStack.Count < 1) return 0;
+            ClosePopup(stateStack[0]);
+            return closeAll ? ClosePopup(closeAll) : stateStack.Count;
         }
 
-        public GameManager<G> Back(GameState gameState)
+        public GameManager Back(GameState gameState)
         {
             if (ClosePopup(gameState))
             {
@@ -114,7 +116,7 @@ namespace SeganX
             }
             else if (currentState == gameState)
             {
-                CloseState();
+                CloseCurrentState();
                 OnBackButton(CurrentPopup != null ? CurrentPopup : currentState);
             }
             return this;
@@ -137,19 +139,19 @@ namespace SeganX
             }
         }
 
-        public virtual void LateUpdate()
+        protected virtual void LateUpdate()
         {
             //  handle escape key
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (guiStack.Count > 0)
-                    guiStack[0].Back();
+                if (stateStack.Count > 0)
+                    stateStack[0].Back();
                 else if (currentState != null)
                     currentState.Back();
             }
         }
 
-        private void Reset()
+        protected virtual void Reset()
         {
             var validPath = Application.dataPath + "/Resources/" + prefabPath;
             if (System.IO.Directory.Exists(validPath) == false)
@@ -168,12 +170,5 @@ namespace SeganX
             GUI.Box(new Rect(0, 0, 100, 100), str);
         }
 #endif
-
-
-        ////////////////////////////////////////////////////////////
-        /// STATIC MEMBERS
-        ////////////////////////////////////////////////////////////
-        private static G instance = null;
-        public static G Instance { get { return instance == null ? (instance = FindObjectOfType<G>()) : instance; } }
     }
 }

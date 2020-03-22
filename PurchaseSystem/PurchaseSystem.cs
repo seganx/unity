@@ -69,6 +69,7 @@ namespace SeganX
         private static PurchaseProvider purchaseProvider = PurchaseProvider.Null;
         private static CallbackCaller callbackCaller = new CallbackCaller();
 
+        private static int Version { get; set; }
         private static string StoreUrl { get; set; }
         public static bool IsInitialized { get; private set; }
         public static PurchaseProvider LastProvider { get { return purchaseProvider; } }
@@ -78,8 +79,9 @@ namespace SeganX
             DontDestroyOnLoad(Game.Instance.gameObject.AddComponent<PurchaseSystem>());
         }
 
-        public static void Initialize(string bazaarKey, string storeUrl)
+        public static void Initialize(int version, string bazaarKey, string storeUrl)
         {
+            Version = version;
             StoreUrl = storeUrl;
             if (IsInitialized == false)
             {
@@ -213,7 +215,7 @@ namespace SeganX
                 {
                     Debug.Log("Verifying purchase: " + res);
                     if (Payload.IsValid(res.DeveloperPayload))
-                        Online.Purchase.End(Online.Purchase.Provider.Cafebazaar, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == res.DeveloperPayload, res.PurchaseToken));
+                        Online.Purchase.End(Online.Purchase.Provider.Cafebazaar, Version, res.ProductId, res.PurchaseToken, (success, payload) => callbackCaller.Call(success && payload == res.DeveloperPayload, res.PurchaseToken));
                     else
                         callbackCaller.Call(false, res.PurchaseToken);
                 };

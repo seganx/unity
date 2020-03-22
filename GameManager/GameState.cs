@@ -11,7 +11,7 @@
         //  will be called whene back button pressed
         public virtual void Back()
         {
-            gameManager.Back(this);
+            game.Back(this);
         }
 
         public virtual void Reset()

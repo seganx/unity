@@ -1,4 +1,5 @@
 ﻿using UnityEngine.UI;
+using SeganX;
 
 public class SelectionItemBase<T> : Base
 {

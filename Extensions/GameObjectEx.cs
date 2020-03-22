@@ -10,24 +10,28 @@ public static class GameObjectEx
         return self.transform as RectTransform;
     }
 
-    public static GameObject Clone(this GameObject self)
+    public static GameObject Clone(this GameObject self, bool copyParent = true, bool copyTransform = true)
     {
         var res = GameObject.Instantiate(self);
         res.name = self.name;
-        if (self.transform.parent != null)
+
+        if (copyParent && self.transform.parent != null)
             res.transform.SetParent(self.transform.parent, false);
-        res.transform.CopyValuesFrom(self.transform);
+
+        if(copyTransform)
+            res.transform.CopyValuesFrom(self.transform);
+
         return res;
     }
 
-    public static T Clone<T>(this GameObject self) where T : Component
+    public static T Clone<T>(this GameObject self, bool copyParent = true, bool copyTransform = true) where T : Component
     {
-        return self.Clone().GetComponent<T>();
+        return self.Clone(copyParent, copyTransform).GetComponent<T>();
     }
 
-    public static T Clone<T>(this Component self) where T : Component
+    public static T Clone<T>(this Component self, bool copyParent = true, bool copyTransform = true) where T : Component
     {
-        return self.gameObject.Clone<T>();
+        return self.gameObject.Clone<T>(copyParent, copyTransform);
     }
 
     public static T Clone<T>(this Component self, Transform parent, bool worldPositionStays = false) where T : Component

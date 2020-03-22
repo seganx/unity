@@ -19,6 +19,7 @@ namespace SeganX
             [System.Serializable]
             private class EndPost
             {
+                public int version = 0;
                 public string token = string.Empty;
                 public string sku = string.Empty;
                 public string payload = string.Empty;
@@ -57,7 +58,7 @@ namespace SeganX
                 }
             }
 
-            public static void End(Provider provider, string sku, string token, System.Action<bool, string> callback)
+            public static void End(Provider provider, int version, string sku, string token, System.Action<bool, string> callback)
             {
                 if (provider == Provider.Cafebazaar)
                 {
@@ -66,6 +67,7 @@ namespace SeganX
                         callback(success, payload);
 
                         var post = new EndPost();
+                        post.version = version;
                         post.sku = sku;
                         post.token = token;
                         post.payload = payload;

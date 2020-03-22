@@ -26,7 +26,7 @@ namespace SeganX
         // Update is called once per frame
         void Update()
         {
-            if (gameManager.CurrentPopup != null || commands.Count < 1) return;
+            if (game.CurrentPopup != null || commands.Count < 1) return;
             var curr = commands[0];
             if(curr.delay > 0.001f)
             {
