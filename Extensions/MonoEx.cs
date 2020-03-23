@@ -369,10 +369,14 @@ public static class MonoEx
 
     public static List<T> Shuffle<T>(this List<T> self, System.Random randomer = null)
     {
-        if (randomer == null)
-            self.Sort((x, y) => Random.Range(-1, 2));
-        else
-            self.Sort((x, y) => randomer.Next(-1, 2));
+        int n = self.Count;
+        while (n > 1)
+        {
+            int k = randomer == null ? Random.Range(0, n--) : randomer.Next(n--);
+            T value = self[k];
+            self[k] = self[n];
+            self[n] = value;
+        }
         return self;
     }
 
