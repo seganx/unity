@@ -152,8 +152,8 @@ namespace SeganX
             char[] splitTags = { '_' };
             var item = new File();
             item.name = resname;
-            item.dire = System.IO.Path.GetDirectoryName(filepath) + "/";
-            item.path = filepath.ExcludeFileExtention();
+            item.dire = System.IO.Path.GetDirectoryName(filepath).Replace("\\", "/") + "/";
+            item.path = filepath.ExcludeFileExtention().Replace("\\", "/");
             item.tags.AddRange(item.name.Split(splitTags, System.StringSplitOptions.RemoveEmptyEntries));
             item.id = item.tags.Count > 0 ? item.tags[0].ToInt(-1) : -1;
             if (Instance.justFilesWithId && item.id == -1) return;
