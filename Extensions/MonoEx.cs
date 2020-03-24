@@ -93,7 +93,7 @@ public static class MonoEx
 
     public static string EscapeURL(this string self)
     {
-        return WWW.EscapeURL(self).Replace("+", "%20");
+        return UnityEngine.Networking.UnityWebRequest.EscapeURL(self).Replace("+", "%20");
     }
 
     public static string BuildPath(this string self)

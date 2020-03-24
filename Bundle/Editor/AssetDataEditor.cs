@@ -20,7 +20,7 @@ public class AssetDataEditor : Editor
                 var asset = target as AssetData;
                 var path = AssetDatabase.GetAssetPath(target);
                 var importer = AssetImporter.GetAtPath(path);
-                asset.id = EditorOnlineData.GenerateAssetId();
+                asset.id = 0;
                 importer.assetBundleName = "asset" + asset.id;
                 EditorUtility.SetDirty(asset);
             }
