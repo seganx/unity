@@ -74,7 +74,56 @@ namespace SeganX
                 "\n" + req.downloadHandler.text);
 
             callback(req);
-            req.Dispose();
+
+#if off
+            WWW res = null;
+
+            // handle reqest delay time
+            {
+                var deltaTime = Time.time - requestTime;
+                requestTime = Time.time;
+                yield return new WaitForSeconds(Mathf.Clamp01(1.5f - deltaTime));
+            }
+
+            if (postdata.HasContent() || header != null)
+            {
+                if (header == null)
+                    header = new Dictionary<string, string>();
+
+                if (header.ContainsKey("Content-Type") == false)
+                {
+                    header.Add("Accept", "*/*");
+                    header.Add("Content-Type", "application/json");
+                    header.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+                }
+
+                Debug.Log("Getting data from " + url + "\nHeader: " + header.GetStringDebug() + "\nPostData:" + postdata);
+                res = new WWW(url, postdata.HasContent() ? postdata.GetBytes() : null, header);
+            }
+            else
+            {
+                Debug.Log("Getting data from " + url);
+                res = new WWW(url);
+            }
+
+            var ret = Time.time;
+            if (onProgressCallback != null)
+            {
+                while (res.keepWaiting && (Time.time - ret) < requestTimeout)
+                {
+                    onProgressCallback(res.progress);
+                    yield return null;
+                }
+            }
+            else yield return new WaitUntil(() => res.isDone || (Time.time - ret) > requestTimeout);
+
+            if (res.isDone)
+                Debug.Log("Received " + res.bytesDownloaded + " bytes from " + url + ":\nHeader:" + res.responseHeaders.GetStringDebug() + "\n" + res.text);
+            else
+                Debug.Log("Failed to download from " + url);
+
+            callback(res);
+#endif
         }
 
 
@@ -83,6 +132,7 @@ namespace SeganX
         ////////////////////////////////////////////////////////////
         public static Status status = Status.Ready;
         public static string userheader = string.Empty;
+        public static float requestTime = 1;
         public static int requestTimeout = 15;
         private static Http instance = null;
 
@@ -114,6 +164,24 @@ namespace SeganX
 
         private static void PostDownloadText(UnityWebRequest req, Action<string> callback)
         {
+#if OFF
+            if (req.isDone && req.responseHeaders != null && req.responseHeaders.ContainsKey("STATUS") && req.responseHeaders["STATUS"].Contains("200"))
+            {
+                status = Status.Ready;
+                callback(req.text.GetWithoutBOM());
+            }
+            else if (req.error.HasContent() && req.error[0] == '5')
+            {
+                status = Status.ServerError;
+                callback(null);
+            }
+            else
+            {
+                status = Status.NetworkError;
+                callback(null);
+            }
+            req.Dispose();
+#endif
             if (req.isDone && req.responseCode == 200)
             {
                 status = Status.Ready;
@@ -129,7 +197,6 @@ namespace SeganX
                 status = Status.NetworkError;
                 callback(null);
             }
-            req.Dispose();
         }
     }
 }
