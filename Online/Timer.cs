@@ -39,7 +39,7 @@ namespace SeganX
             {
                 DownloadData<long>("time.php", null, (success, res) =>
                 {
-                    if (success)
+                    if (success && res > 0)
                     {
                         Synced = true;
                         deltaTime = UnixTimeToLocalTime(res) - DateTime.Now;

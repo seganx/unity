@@ -382,7 +382,7 @@ public static class MonoEx
 
     public static T LastOne<T>(this List<T> self)
     {
-        return self[self.Count - 1];
+        return self.Count > 0 ? self[self.Count - 1] : default;
     }
 
 

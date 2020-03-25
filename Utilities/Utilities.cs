@@ -151,6 +151,13 @@ namespace SeganX
 
         public static float RandomDoubleHigh(float min, float max)
         {
+            if (max < min)
+            {
+                var tmp = min;
+                min = max;
+                max = tmp;
+            }
+
             var delta = max - min;
             var r1 = UnityEngine.Random.Range(min, max + delta);
             var r2 = UnityEngine.Random.Range(min, max + delta);
@@ -161,6 +168,13 @@ namespace SeganX
 
         public static int RandomDoubleHigh(int min, int max)
         {
+            if (max < min)
+            {
+                var tmp = min;
+                min = max;
+                max = tmp;
+            }
+
             var delta = max - min;
             var r1 = UnityEngine.Random.Range(min, max + delta);
             var r2 = UnityEngine.Random.Range(min, max + delta);

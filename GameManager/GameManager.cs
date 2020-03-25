@@ -23,28 +23,33 @@ namespace SeganX
 
         public T OpenState<T>(bool resetStack = false) where T : GameState
         {
-            T state = Resources.Load<T>(prefabPath + typeof(T).Name);
-            if (state == null)
+            // load prefab
+            T prefab = Resources.Load<T>(prefabPath + typeof(T).Name);
+            if (prefab == null)
             {
                 Debug.LogError("GameManager could not find " + typeof(T).Name);
                 return null;
             }
 
+            // close current state
             if (currentState != null)
             {
                 var delay = currentState.PreClose();
-                
                 Destroy(currentState.gameObject, delay);
             }
 
+            // update type stack
             if (resetStack) typeStack.Clear();
-            typeStack.Insert(0, typeof(T));
-            currentState = Instantiate<GameState>(state);
-            currentState.name = state.name;
+            if (typeStack.Count < 1 || typeStack[0] != typeof(T))
+                typeStack.Insert(0, typeof(T));
+
+            // instantiate new state from prefab
+            currentState = Instantiate<GameState>(prefab);
+            currentState.name = prefab.name;
+
             AttachState(currentState);
 
             OnOpenState(currentState);
-
             return currentState as T;
         }
 

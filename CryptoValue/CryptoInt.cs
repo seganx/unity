@@ -7,6 +7,7 @@ namespace SeganX
     {
         public int k;
         public int v;
+        public int c;
 
         public int Value { get { return Decrypt(v, k); } }
 
@@ -15,6 +16,7 @@ namespace SeganX
             var rand = new Random((int)DateTime.Now.Ticks);
             do { k = rand.Next(int.MinValue, int.MaxValue); } while (k == 0);
             v = Encrypt(a, k);
+            c = a;
         }
 
         public override string ToString()
@@ -29,23 +31,23 @@ namespace SeganX
 
         public static implicit operator int(CryptoInt value)
         {
-            return Decrypt(value.v, value.k);
+            return value.Value;
         }
 
         public static implicit operator string(CryptoInt value)
         {
-            return Decrypt(value.v, value.k).ToString();
+            return value.Value.ToString();
         }
 
         public static CryptoInt operator ++(CryptoInt input)
         {
-            input = Decrypt(input.v, input.k) + 1;
+            input = input.Value + 1;
             return input;
         }
 
         public static CryptoInt operator --(CryptoInt input)
         {
-            input = Decrypt(input.v, input.k) - 1;
+            input = input.Value - 1;
             return input;
         }
 

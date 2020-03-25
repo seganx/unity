@@ -11,10 +11,12 @@ namespace SeganX
         {
             var key = prop.FindPropertyRelative("k");
             var value = prop.FindPropertyRelative("v");
+            var check = prop.FindPropertyRelative("c");
 
             CryptoInt tmp;
             tmp.k = key.intValue;
             tmp.v = value.intValue;
+            tmp.c = check.intValue;
 
             EditorGUI.BeginChangeCheck();
             int val = EditorGUI.DelayedIntField(pos, label, tmp);
@@ -23,6 +25,7 @@ namespace SeganX
                 tmp = val;
                 key.intValue = tmp.k;
                 value.intValue = tmp.v;
+                check.intValue = tmp.c;
             }
         }
     }

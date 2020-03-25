@@ -63,7 +63,7 @@ namespace SeganX
                 Debug.Log(debug);
             }
 
-            req.timeout = requestTimeout;
+            //req.timeout = requestTimeout;
             yield return req.SendWebRequest();
 
             //  print the result
