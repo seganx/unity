@@ -22,7 +22,7 @@ namespace SeganX
             var assembly = AppDomain.CurrentDomain.Load("Assembly-CSharp");
             userheader = assembly.ManifestModule.ModuleVersionId + ".";
             var req = UnityWebRequest.Get(assembly.CodeBase);
-            yield return req.SendWebRequest();
+            yield return req;
             if (req.isDone && string.IsNullOrEmpty(req.error))
             {
                 var mem = new MemoryStream(req.downloadHandler.data);
@@ -39,14 +39,23 @@ namespace SeganX
 
         private IEnumerator DoDownloadText(string url, string postdata, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> onProgressCallback = null)
         {
-            UnityWebRequest req = new UnityWebRequest(url);
+            // handle reqest delay time
+            {
+                var deltaTime = Time.time - requestTime;
+                requestTime = Time.time;
+                yield return new WaitForSeconds(Mathf.Clamp01(1.5f - deltaTime));
+            }
+
+            var req = new UnityWebRequest(url);
             req.downloadHandler = new DownloadHandlerBuffer();
+            req.chunkedTransfer = false;
 
             if (postdata != null)
             {
                 req.method = UnityWebRequest.kHttpVerbPOST;
                 req.uploadHandler = new UploadHandlerRaw(postdata.GetBytes());
                 req.uploadHandler.contentType = "application/json";
+
             }
 
             req.SetRequestHeader("Accept", "*/*");
@@ -65,6 +74,7 @@ namespace SeganX
 
             //req.timeout = requestTimeout;
             yield return req.SendWebRequest();
+            while (!req.isDone) yield return null;
 
             //  print the result
             Debug.Log(
@@ -74,16 +84,9 @@ namespace SeganX
                 "\n" + req.downloadHandler.text);
 
             callback(req);
-
 #if off
-            WWW res = null;
 
-            // handle reqest delay time
-            {
-                var deltaTime = Time.time - requestTime;
-                requestTime = Time.time;
-                yield return new WaitForSeconds(Mathf.Clamp01(1.5f - deltaTime));
-            }
+            WWW res = null;
 
             if (postdata.HasContent() || header != null)
             {
