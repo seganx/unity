@@ -38,6 +38,7 @@ namespace SeganX
                      catch (System.Exception e)
                      {
                          error = e.Message;
+                         Debug.LogError(error);
                      }
 
                      if (res != null)

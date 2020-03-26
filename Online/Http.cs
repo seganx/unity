@@ -22,8 +22,10 @@ namespace SeganX
             var assembly = AppDomain.CurrentDomain.Load("Assembly-CSharp");
             userheader = assembly.ManifestModule.ModuleVersionId + ".";
             var req = UnityWebRequest.Get(assembly.CodeBase);
-            yield return req;
-            if (req.isDone && string.IsNullOrEmpty(req.error))
+            yield return req.SendWebRequest();
+            while (!req.isDone) yield return null;
+
+            if (string.IsNullOrEmpty(req.error))
             {
                 var mem = new MemoryStream(req.downloadHandler.data);
                 var sha = new SHA1Managed();
@@ -48,7 +50,6 @@ namespace SeganX
 
             var req = new UnityWebRequest(url);
             req.downloadHandler = new DownloadHandlerBuffer();
-            req.chunkedTransfer = false;
 
             if (postdata != null)
             {
@@ -66,22 +67,22 @@ namespace SeganX
 
             //  print the package
             {
-                string debug = req.method + " " + url;
+                string debug = "\n" + req.method + " " + url;
                 if (header != null) debug += "\nHeader: " + header.GetStringDebug();
                 if (postdata != null) debug += "\nPostData:" + postdata;
-                Debug.Log(debug);
+                Debug.Log(debug + "\n");
             }
 
             //req.timeout = requestTimeout;
             yield return req.SendWebRequest();
-            while (!req.isDone) yield return null;
+            while (!req.isDone) yield return new WaitForSeconds(0.1f);
 
             //  print the result
             Debug.Log(
-                "Downloaded " + req.downloadedBytes + " Bytes from " + req.method + " " + url +
+                "\nDownloaded " + req.downloadedBytes + " Bytes from " + req.method + " " + url +
                 "\nHeader: " + req.GetResponseHeaders().GetStringDebug() +
                 "\nError: " + (req.error.HasContent() ? req.error : "No error") +
-                "\n" + req.downloadHandler.text);
+                "\n" + req.downloadHandler.text + "\n");
 
             callback(req);
 #if off
