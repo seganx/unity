@@ -28,7 +28,7 @@ namespace SeganX.Console
         //////////////////////////////////////////////////////////////
         //  STATIC MEMBERS
         //////////////////////////////////////////////////////////////
-        public static event OnDisplayInfoEvent OnDisplayInfo = null;
+        public static OnDisplayInfoEvent OnDisplayInfo = null;
 
         public static string GetSystemInfo()
         {

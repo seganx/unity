@@ -11,7 +11,7 @@ namespace SeganX
     public class TextTyper : MonoBehaviour
     {
         [SerializeField] private Text target = null;
-        [SerializeField] private float delayTime = 0.035f;
+        [SerializeField] private float delayTime = 0.01f;
 
         private string[] lines = null;
         private string text = string.Empty;
@@ -54,13 +54,13 @@ namespace SeganX
             int rindex = 0;
             for (int l = 0; l < lines.Length; l++)
             {
-                for (int i = lines[l].Length - 1; i >= 0; i--)
+                for (int i = lines[l].Length - 1; i >= 0 && target.text == text; i--)
                 {
                     target.text = text = text.Insert(rindex, string.Empty + lines[l][i]);
                     yield return typeDelay;
                 }
 
-                if (l < lines.Length - 1)
+                if (l < lines.Length - 1 && target.text == text)
                 {
                     text = text + '\n';
                     target.text = text;

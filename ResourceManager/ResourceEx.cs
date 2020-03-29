@@ -45,6 +45,15 @@ namespace SeganX
             return file != null ? Resources.Load<T>(file.path) : default(T);
         }
 
+        public static T LoadWithId<T>(string dire, int id) where T : Object, IResource
+        {
+            var file = Instance.files.Find(x => IsSimilarPath(x.dire, dire) && x.id == id);
+            if (file == null) return default;
+            var prefab = Resources.Load<T>(file.path);
+            prefab.Id = id;
+            return prefab;
+        }
+
         public static List<File> LoadAll(string dire, string includes)
         {
             var arr = includes.Split(splitIncludes, System.StringSplitOptions.RemoveEmptyEntries);
