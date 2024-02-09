@@ -11,18 +11,12 @@ namespace SeganX.Audio
         public enum Channel
         {
             Master = 0,
-            Sound = 1,
-            VFX = 2,
-            UI = 3,
-            Music = 4,
-            Ambient = 5,
-            Narrator = 6,
-            Weapons = 7,
-            AS_Attack = 8,
-            AS_Assist = 9,
-            AS_Shield = 10,
-            GP_Probs = 11,
-            Count = 12
+            VFX = 1,
+            UI = 2,
+            Music = 3,
+            Ambient = 4,
+            Narrator = 5,
+            Count = 6
         }
 
         [SerializeField] private AudioMixer mixer;
@@ -129,7 +123,13 @@ namespace SeganX.Audio
 
         public static AudioMixerGroup GetMixer(Channel channel)
         {
-            return instance.mixer.FindMatchingGroups(channel.ToString())[0];
+            var group = instance.mixer.FindMatchingGroups(channel.ToString());
+            if ( group == null || group.Length == 0)
+            {
+                Debug.LogWarning($"{nameof(AudioPlayer)} Can't find the channel {channel}!");
+                return null;
+            }
+            return group[0];
         }
 
         public static void TransitionTo(string state, float timeToReach)
