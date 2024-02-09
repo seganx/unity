@@ -1,26 +1,27 @@
 ﻿#if UNITY_EDITOR
-using UnityEngine;
-using UnityEditor;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
 
 namespace SeganX
 {
     public class EditorCacheItems
     {
-        [MenuItem("SeganX/Cache/Clear All")]
+        [MenuItem("SeganX/Cache/Clear All", priority = 151)]
         private static void ClearAll()
         {
             ClearPlayerPrefs();
             ClearFiles();
         }
 
-        [MenuItem("SeganX/Cache/Clear PlayerPrefs")]
+        [MenuItem("SeganX/Cache/Clear PlayerPrefs", priority = 152)]
         private static void ClearPlayerPrefs()
         {
+            PlayerPrefsEx.ClearData();
             PlayerPrefs.DeleteAll();
         }
 
-        [MenuItem("SeganX/Cache/Clear Files")]
+        [MenuItem("SeganX/Cache/Clear Files", priority = 153)]
         private static void ClearFiles()
         {
             Caching.ClearCache();

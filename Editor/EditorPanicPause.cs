@@ -1,34 +1,37 @@
 ﻿using System.Threading;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
-[InitializeOnLoad]
-public class EditorPanicPause : MonoBehaviour
+namespace SeganX
 {
-    private static Thread panicThread = null;
-
-    static EditorPanicPause()
+    [InitializeOnLoad]
+    public class EditorPanicPause : MonoBehaviour
     {
-        if (panicThread != null) return;
+        private static Thread panicThread = null;
 
-        //panicThread = new Thread(PanicWorkingThread);
-        //panicThread.Start();
-    }
-
-    static void PanicWorkingThread()
-    {
-        Debug.Log("Start panic thread");
-        while (EditorApplication.isPlaying)
+        static EditorPanicPause()
         {
-            Thread.Sleep(20);
-            if (Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape))
-            {
-                EditorApplication.isPaused = true;
-                break;
-            }
+            if (panicThread != null) return;
+
+            //panicThread = new Thread(PanicWorkingThread);
+            //panicThread.Start();
         }
 
-        Debug.Log("End panic thread");
-        panicThread = null;
+        static void PanicWorkingThread()
+        {
+            Debug.Log("Start panic thread");
+            while (EditorApplication.isPlaying)
+            {
+                Thread.Sleep(20);
+                if (Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape))
+                {
+                    EditorApplication.isPaused = true;
+                    break;
+                }
+            }
+
+            Debug.Log("End panic thread");
+            panicThread = null;
+        }
     }
 }

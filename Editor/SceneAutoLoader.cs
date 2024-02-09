@@ -1,7 +1,7 @@
 ﻿#if UNITY_EDITOR
-using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace SeganX
 {
@@ -107,7 +107,7 @@ namespace SeganX
             get
             {
                 string[] s = Application.dataPath.Split('/');
-                return s[s.Length - 2];
+                return s[s.Length - 3] + "." + s[s.Length - 2];
             }
         }
 

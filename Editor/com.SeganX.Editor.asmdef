@@ -1,0 +1,17 @@
+{
+    "name": "com.SeganX.Editor",
+    "references": [
+        "GUID:59b9d6b2424d8024db35728b5a141345"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
