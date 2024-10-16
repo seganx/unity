@@ -4,33 +4,35 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
-public class DropdownAttribute : PropertyAttribute
+namespace SeganX
 {
-    private List<string> itemList = new List<string>();
-
-    public List<string> Items => itemList;
-
-    public DropdownAttribute(params string[] items)
+    public class DropdownAttribute : PropertyAttribute
     {
-        itemList.AddRange(items);
+        private List<string> itemList = new List<string>();
+
+        public List<string> Items => itemList;
+
+        public DropdownAttribute(params string[] items)
+        {
+            itemList.AddRange(items);
+        }
     }
-}
 
 #if UNITY_EDITOR
-[CustomPropertyDrawer(typeof(DropdownAttribute))]
-public class DropdownPropertyDrawer : PropertyDrawer
-{
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(DropdownAttribute))]
+    public class DropdownPropertyDrawer : PropertyDrawer
     {
-        var attrib = attribute as DropdownAttribute;
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var attrib = attribute as DropdownAttribute;
 
-        EditorGUI.BeginChangeCheck();
+            EditorGUI.BeginChangeCheck();
 
-        var newIndex = EditorGUI.Popup(position, label.text, attrib.Items.FindIndex(x => x.Equals(property.stringValue)), attrib.Items.ToArray());
-        
-        if (EditorGUI.EndChangeCheck())
-            property.stringValue = attrib.Items[newIndex];
+            var newIndex = EditorGUI.Popup(position, label.text, attrib.Items.FindIndex(x => x.Equals(property.stringValue)), attrib.Items.ToArray());
+
+            if (EditorGUI.EndChangeCheck())
+                property.stringValue = attrib.Items[newIndex];
+        }
     }
-}
 #endif
+}

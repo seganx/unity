@@ -2,35 +2,21 @@
 
 namespace SeganX.Audio
 {
+    [RequireComponent(typeof(AudioSource))]
     public class PlaySound : MonoBehaviour
     {
-        [SerializeField] protected bool is3D;
-        [SerializeField] protected bool playOnStart;
-        [SerializeField] protected AudioPlayerProfile audioPlayerProfile;
+        [SerializeField] protected AudioSource audioSource = null;
+        [SerializeField] protected AudioPlayerProfile audioPlayerProfile = null;
 
-        private AudioSource audioSource;
-
-        protected AudioSource AudioSource
+        protected virtual void Reset()
         {
-            get
-            {
-                if (audioSource == null)
-                {
-                    audioSource = GetComponent<AudioSource>();
-                    if (audioSource == null)
-                    {
-                        audioSource = gameObject.AddComponent<AudioSource>();
-                    }
-                }
-
-                return audioSource;
-            }
-            set => audioSource = value;
+            if (audioSource == null)
+                audioSource = GetComponent<AudioSource>();
         }
 
         private void Start()
         {
-            if (playOnStart && audioPlayerProfile != null)
+            if (audioSource.playOnAwake && audioPlayerProfile != null)
             {
                 Play();
             }
@@ -41,35 +27,39 @@ namespace SeganX.Audio
             PlayCustom(audioPlayerProfile);
         }
 
+        public void Stop()
+        {
+            audioSource.Stop();
+        }
+
         public virtual void PlayCustom(AudioPlayerProfile audioPlayerProfile)
         {
             if (audioPlayerProfile == null)
             {
-                Debug.LogError($"{name}: {nameof(PlayMusic)}: Audio Player Profile is null!");
+                Debug.LogError($"{name}: {nameof(PlaySound)}: Audio Player Profile is null!");
+                return;
+            }
+            audioSource.clip = audioPlayerProfile.clip;
+            audioSource.outputAudioMixerGroup = AudioPlayer.GetMixer(audioPlayerProfile.channel);
+            audioSource.pitch = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.pitch);
+            audioSource.volume = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.volume);
+            audioSource.loop = audioPlayerProfile.isLoop;
+            audioSource.Play();
+        }
+
+        public virtual void PlayOneShot(AudioPlayerProfile audioPlayerProfile)
+        {
+            if (audioPlayerProfile == null)
+            {
+                Debug.LogError($"{name}: {nameof(PlaySound)}: Audio Player Profile is null!");
                 return;
             }
 
-            AudioSource.spatialBlend = is3D ? 1 : 0;
-            AudioSource.rolloffMode = AudioRolloffMode.Linear;
-            AudioSource.outputAudioMixerGroup = AudioPlayer.GetMixer(audioPlayerProfile.channel);
-            AudioSource.pitch = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.pitch);
-            AudioSource.volume = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.volume);
-            AudioSource.loop = audioPlayerProfile.isLoop;
-
-            if (AudioSource.isPlaying)
-            {
-                AudioSource.PlayOneShot(audioPlayerProfile.clip);
-            }
-            else
-            {
-                AudioSource.clip = audioPlayerProfile.clip;
-                AudioSource.Play();
-            }
-        }
-
-        public void Stop()
-        {
-            AudioSource.Stop();
+            audioSource.outputAudioMixerGroup = AudioPlayer.GetMixer(audioPlayerProfile.channel);
+            audioSource.pitch = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.pitch);
+            audioSource.volume = AudioPlayer.CalculateMinMaxValue(audioPlayerProfile.volume);
+            audioSource.loop = audioPlayerProfile.isLoop;
+            audioSource.PlayOneShot(audioPlayerProfile.clip);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+
 namespace SeganX
 {
     public static class TransformEx

@@ -1,6 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Legacy Shaders/Albedo/Alpha/ReplaceColor" 
+Shader "SeganX/Legacy/Albedo/Alpha/ReplaceColor" 
 {
 	Properties 
 	{

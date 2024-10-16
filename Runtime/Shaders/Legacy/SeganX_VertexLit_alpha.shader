@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Legacy Shaders/VertexLit_alpha" 
+Shader "SeganX/Legacy/VertexLit_alpha" 
 {
 	Properties 
 	{

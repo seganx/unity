@@ -1,6 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Legacy Shaders/Font_Shadow" {
+Shader "SeganX/Legacy/Font_Shadow" {
 	Properties 
 	{
 		_MainTex ("Base (RGB)", 2D) = "white" {}

@@ -2,9 +2,9 @@
   "name": "com.seganx.unity",
   "displayName": "SeganX",
   "version": "7.1.8",
-  "unity": "2019+",
+  "unity": "2019.4",
   "description": "This is the SeganX library including scripts and tools for unity game development.",
-  "keywords": [ "SeganX", "seganx", "Funtory", "funtory" ],
+  "keywords": [ "SeganX", "seganx" ],
   "category": "Project Base",
   "author": {
     "name": "Sajad Beigjani",

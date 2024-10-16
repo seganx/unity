@@ -7,11 +7,13 @@ namespace SeganX
         [SerializeField] protected bool autoStart = true;
 
         [SerializeField] protected Transform target = null;
-        [SerializeField] protected AnimationCurve rangeX, rangeY, rangeZ;
+        [SerializeField] protected ParticleSystem.MinMaxCurve rangeX, rangeY, rangeZ;
+        //[SerializeField] protected AnimationCurve rangeX, rangeY, rangeZ;
 
         protected float timer = 0;
-        protected float curvesMaxTimeLenght = 0;
+        protected bool modesAreCurve = false;
         protected bool curvesAreClamped = false;
+        protected float curvesMaxTimeLenght = 0;
 
         public virtual bool IsPlaying { get; protected set; } = false;
 
@@ -35,8 +37,9 @@ namespace SeganX
 
         protected virtual void Start()
         {
-            curvesMaxTimeLenght = Mathf.Max(GetTimeLenght(rangeX), GetTimeLenght(rangeY), GetTimeLenght(rangeZ));
-            curvesAreClamped = CurveIsClamped(rangeX.postWrapMode) && CurveIsClamped(rangeY.postWrapMode) && CurveIsClamped(rangeZ.postWrapMode);
+            curvesMaxTimeLenght = Mathf.Max(GetTimeLenght(rangeX.curve), GetTimeLenght(rangeY.curve), GetTimeLenght(rangeZ.curve));
+            curvesAreClamped = CurveIsClamped(rangeX.curve.postWrapMode) && CurveIsClamped(rangeY.curve.postWrapMode) && CurveIsClamped(rangeZ.curve.postWrapMode);
+            modesAreCurve = rangeX.mode == ParticleSystemCurveMode.Curve || rangeY.mode == ParticleSystemCurveMode.Curve || rangeZ.mode == ParticleSystemCurveMode.Curve;
 
             if (all.Contains(this) == false)
                 all.Add(this);

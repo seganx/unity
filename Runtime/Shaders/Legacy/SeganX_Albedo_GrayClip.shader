@@ -1,6 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Legacy Shaders/Albedo/GrayScale_Clip" 
+Shader "SeganX/Legacy/Albedo/GrayScale_Clip" 
 {
 	Properties 
 	{

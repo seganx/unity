@@ -5,13 +5,17 @@ namespace SeganX
 {
     public static class ImageEx
     {
-        public static uint ToUint(this Color32 color)
+        public static int ToInt(this Color32 color)
         {
-            int res = (color.r ) | (color.g ) << 8 | (color.b ) << 16 | (color.a ) << 24;
-            return (uint)res;
+            return (color.r) | (color.g) << 8 | (color.b) << 16 | (color.a) << 24;
         }
 
-        public static Color32 ToColor32(this uint color)
+        public static uint ToUint(this Color32 color)
+        {
+            return (uint)ToInt(color);
+        }
+
+        public static Color32 ToColor32(this int color)
         {
             Color32 res = new Color32();
             res.r = (byte)((color));
@@ -19,6 +23,11 @@ namespace SeganX
             res.b = (byte)((color) >> 16);
             res.a = (byte)((color) >> 24);
             return res;
+        }
+
+        public static Color32 ToColor32(this uint color)
+        {
+            return ToColor32((int)color);
         }
 
         public static Image SetColorAlpha(this Image self, float value)

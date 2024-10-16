@@ -1,8 +1,4 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-Shader "Legacy Shaders/Multi/Metal"
+﻿Shader "SeganX/Legacy/Multi/Metal"
 {
     Properties
     {

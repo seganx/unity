@@ -31,8 +31,8 @@ namespace SeganX.Services
     {
         bool IsSupported { get; }
         void Initialize(string rsaKey, Action callback);
-        void Purchase(string sku, int price, string payload, Action<bool, string> callback);
-        void Consume(string sku, int price, string token, Action<bool> callback);
+        void StartPurchase(string sku, int price, string payload, Action<bool, string> callback);
+        void Consume(string token, int price, Action<bool> callback);
         void GetSkuDetails(string[] skus, Action<List<SkuDetails>> callback);
         void GetPurchases(Action<bool, List<PurchaseData>> callback);
     }

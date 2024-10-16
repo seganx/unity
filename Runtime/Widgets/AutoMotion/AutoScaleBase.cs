@@ -11,9 +11,9 @@ namespace SeganX.Widgets
         protected override void Reset()
         {
             base.Reset();
-            rangeX = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
-            rangeY = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
-            rangeZ = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
+            rangeX.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
+            rangeY.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
+            rangeZ.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
         }
 
         protected override void BeforAction()
@@ -27,7 +27,7 @@ namespace SeganX.Widgets
             var range = new Vector3(rangeX.Evaluate(timer), rangeY.Evaluate(timer), rangeZ.Evaluate(timer));
             target.localScale = initialScale + range;
 
-            if (curvesAreClamped && timer > curvesMaxTimeLenght)
+            if (modesAreCurve && curvesAreClamped && timer > curvesMaxTimeLenght)
             {
                 Stop();
             }

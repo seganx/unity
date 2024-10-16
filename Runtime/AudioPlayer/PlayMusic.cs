@@ -21,44 +21,23 @@ namespace SeganX.Audio
 
         private IEnumerator DoPlayMusic(AudioPlayerProfile musicProfile, float fadeInTime, float fadeOutTime)
         {
-            var currentSource = AudioSource;
+            // audioSource.isPlaying in the firs frame was true!!!!!! So I put it on the loop
+            while (audioSource.isPlaying && audioSource.volume > 0)
+            {
+                audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, Time.deltaTime / fadeOutTime);
+                yield return new WaitForEndOfFrame();
+            }
 
-            if (currentSource != null)
-                StartCoroutine(DoFadeOut(currentSource, fadeOutTime));
+            base.PlayCustom(musicProfile);
 
-            var source = gameObject.AddComponent<AudioSource>();
-
-            source.ignoreListenerVolume = true;
-            source.outputAudioMixerGroup = AudioPlayer.GetMixer(AudioPlayer.Channel.Music);
-            source.spatialBlend = is3D ? 1 : 0;
-            source.rolloffMode = AudioRolloffMode.Linear;
-            source.clip = musicProfile.clip;
-            source.loop = musicProfile.isLoop;
-            source.pitch = AudioPlayer.CalculateMinMaxValue(musicProfile.pitch);
-            source.volume = 0;
-
-            source.Play();
-
-            AudioSource = source;
-
+            audioSource.volume = 0;
             var targetVolume = AudioPlayer.CalculateMinMaxValue(musicProfile.volume);
 
-            while (source != null && source.volume < targetVolume)
+            while (audioSource.volume < targetVolume)
             {
-                source.volume = Mathf.MoveTowards(source.volume, targetVolume, Time.deltaTime / fadeInTime);
+                audioSource.volume = Mathf.MoveTowards(audioSource.volume, targetVolume, Time.deltaTime / fadeInTime);
                 yield return new WaitForEndOfFrame();
             }
-        }
-
-        private IEnumerator DoFadeOut(AudioSource source, float fadeOutTime)
-        {
-            while (source != null && source.volume > 0)
-            {
-                source.volume = Mathf.MoveTowards(source.volume, 0, Time.deltaTime / fadeOutTime);
-                yield return new WaitForEndOfFrame();
-            }
-
-            Destroy(source);
         }
     }
 }

@@ -1,6 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Legacy Shaders/Albedo/Cutout" 
+Shader "SeganX/Legacy/Albedo/Cutout" 
 {
 	Properties 
 	{

@@ -1,4 +1,4 @@
-﻿Shader "Legacy Shaders/Multi/Glass"
+﻿Shader "SeganX/Legacy/Multi/Glass"
 {
     Properties
     {

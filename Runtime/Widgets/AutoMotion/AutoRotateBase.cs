@@ -5,16 +5,16 @@ namespace SeganX.Widgets
     public abstract class AutoRotateBase : AutoMotionBase<AutoRotateBase>
     {
         [SerializeField] protected Space space = Space.Self;
-        [SerializeField] protected bool additive = false;
+        [SerializeField] protected bool additive = true;
 
         protected Quaternion initialRotation;
 
         protected override void Reset()
         {
             base.Reset();
-            rangeX = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
-            rangeY = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
-            rangeZ = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
+            rangeX.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
+            rangeY.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
+            rangeZ.curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 360));
         }
 
         protected override void BeforAction()
@@ -51,7 +51,7 @@ namespace SeganX.Widgets
                 }
             }
 
-            if (curvesAreClamped && timer > curvesMaxTimeLenght)
+            if (modesAreCurve && curvesAreClamped && timer > curvesMaxTimeLenght)
             {
                 Stop();
             }

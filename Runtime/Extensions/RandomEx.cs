@@ -1,6 +1,4 @@
 ﻿using System;
-using UnityEngine;
-using Random = System.Random;
 
 namespace SeganX
 {
@@ -10,7 +8,7 @@ namespace SeganX
         /// Returns a random point inside or on a circle with radius 1.0
         /// </summary>
         /// <returns>position</returns>
-        public static Vector3 InsideUnitCircle(this Random random)
+        public static UnityEngine.Vector3 InsideUnitCircle(this Random random)
         {
             double angle = 2 * Math.PI * random.NextDouble();
             double radius = Math.Sqrt(random.NextDouble());
@@ -18,7 +16,7 @@ namespace SeganX
             double x = radius * Math.Cos(angle);
             double y = radius * Math.Sin(angle);
 
-            return new Vector3((float)x, (float)y);
+            return new UnityEngine.Vector3((float)x, (float)y);
         }
 
         /// <summary>
