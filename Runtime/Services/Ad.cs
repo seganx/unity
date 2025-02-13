@@ -21,14 +21,23 @@ namespace SeganX.Services
 
         public static void ShowRewarded(Action<bool> callback)
         {
-#if UNITY_EDITOR
-            callback?.Invoke(true);
-#else
             if (advertise == null)
                 callback?.Invoke(false);
             else
                 advertise.ShowRewarded(callback);
-#endif
+        }
+
+        public static void ShowInterstitial(Action callback)
+        {
+            if (advertise == null)
+                callback?.Invoke();
+            else
+                advertise.ShowInterstitial(callback);
+        }
+
+        public static void SetBanner(bool banner)
+        {
+            advertise?.SetBanner(banner);
         }
     }
 }

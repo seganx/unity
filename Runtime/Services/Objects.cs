@@ -7,7 +7,9 @@ namespace SeganX.Services
     {
         bool IsRewardedLoaded { get; }
         void Initialize(Action callback);
+        void SetBanner(bool banner);
         void ShowRewarded(Action<bool> callback);
+        void ShowInterstitial(Action callback);
     }
 
     public interface IAnalytics
@@ -18,6 +20,7 @@ namespace SeganX.Services
         void Earned(string currency, int amount, string gate, string item);
         void Spent(string currency, int amount, string gate, string item);
         void Purchased(string currency, int amount, string itemType, string itemId, string cartType);
+        void GameAnalyticsEvent(string eventId, float value);
         string GetRemoteConfig(string key, string defaultValue);
     }
 
@@ -32,7 +35,7 @@ namespace SeganX.Services
         bool IsSupported { get; }
         void Initialize(string rsaKey, Action callback);
         void StartPurchase(string sku, int price, string payload, Action<bool, string> callback);
-        void Consume(string token, int price, Action<bool> callback);
+        void FinishPurchase(string sku, int price, string token, Action<bool> callback);
         void GetSkuDetails(string[] skus, Action<List<SkuDetails>> callback);
         void GetPurchases(Action<bool, List<PurchaseData>> callback);
     }
@@ -51,42 +54,11 @@ namespace SeganX.Services
     {
         public string sku;
         public string title;
-        public string price;
         public string description;
+        public string priceFormatted;
+        public string priceCurrency;
+        public float priceAmount;
 
-        override public string ToString() => $"sku: {sku}, title: {title}, price: {price}, description: {description}";
-
-#if MYKET || BAZAAR || IRGOOGLE || SIPAPP
-        public int ExtractPrice(int defaultValue)
-        {
-            if (string.IsNullOrEmpty(price)) return defaultValue;
-            var label = ConvertPersianDigit(price);
-            string temp = string.Empty;
-            for (int i = 0; i < label.Length; i++)
-                if (char.IsDigit(label[i]) || label[i] == '.')
-                    temp += label[i];
-            var result = temp.ToInt(defaultValue);
-            return price.Contains("ریال") ? result / 10 : result;
-        }
-
-        private string ConvertPersianDigit(string label)
-        {
-            return label
-                .Replace('٠', '0').Replace('١', '1').Replace('٢', '2').Replace('٣', '3').Replace('٤', '4')
-                .Replace('٥', '5').Replace('٦', '6').Replace('٧', '7').Replace('٨', '8').Replace('٩', '9')
-                .Replace('۰', '0').Replace('۱', '1').Replace('۲', '2').Replace('۳', '3').Replace('۴', '4')
-                .Replace('۵', '5').Replace('۶', '6').Replace('۷', '7').Replace('۸', '8').Replace('۹', '9');
-        }
-#else
-        public float ExtractPrice(float defaultValue)
-        {
-            if (string.IsNullOrEmpty(price)) return defaultValue;
-            string temp = string.Empty;
-            for (int i = 0; i < price.Length; i++)
-                if (char.IsDigit(price[i]) || price[i] == '.')
-                    temp += price[i];
-            return temp.ToFloat(defaultValue);
-        }
-#endif
+        override public string ToString() => $"sku: {sku}, title: {title}, price: {priceFormatted}, description: {description}";
     }
 }

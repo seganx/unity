@@ -11,6 +11,7 @@
         public static void Earned(string currency, int amount, string gate, string item) => analytics?.Earned(currency, amount, gate, item);
         public static void Spent(string currency, int amount, string gate, string item) => analytics?.Spent(currency, amount, gate, item);
         public static void Purchased(string currency, int amount, string itemType, string itemId, string cartType) => analytics?.Purchased(currency, amount, itemType, itemId, cartType);
+        public static void GameAnalyticsEvent(string eventId, float value) => analytics?.GameAnalyticsEvent(eventId, value);
         public static string GetRemoteConfig(string key, string defaultValue) => analytics != null ? analytics.GetRemoteConfig(key, defaultValue) : defaultValue;
     }
 }
