@@ -1,4 +1,3 @@
-#if SX_ZIP
 namespace SevenZip.Compression.LZ
 {
     public class OutWindow
@@ -107,4 +106,3 @@ namespace SevenZip.Compression.LZ
         }
     }
 }
-#endif

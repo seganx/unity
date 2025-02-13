@@ -70,7 +70,7 @@ namespace SeganX
             if (EventSystem.current == null)
                 new GameObject("EventSystem", new Type[] { typeof(EventSystem), typeof(StandaloneInputModule), typeof(BaseInput) });
 
-            threadedList.Add(new KeyValuePair<string, Color>("Start Version " + Application.version + " on " + Core.DeviceId + " based on " + Core.BaseDeviceId + " at " + DateTime.Now, Color.green));
+            threadedList.Add(new KeyValuePair<string, Color>("Start Version " + Application.version + " on " + Core.deviceId + " at " + DateTime.Now, Color.green));
             Application.logMessageReceivedThreaded += HandleLog;
 
             textVisual = scrollbox.content.GetChild<Text>(0);
@@ -230,7 +230,7 @@ namespace SeganX
             get
             {
                 string res = string.Empty;
-                string str = Core.DeviceId;
+                string str = Core.deviceId;
                 for (int i = 0; i < str.Length; i++)
                 {
                     if (i > 0 && i % 4 == 0)

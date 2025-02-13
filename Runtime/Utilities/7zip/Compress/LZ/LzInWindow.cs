@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip.Compression.LZ
@@ -129,4 +128,3 @@ namespace SevenZip.Compression.LZ
         }
     }
 }
-#endif

@@ -1,87 +1,47 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SeganX
 {
-    public class Core : ScriptableObject
+    public class Core : StaticConfig<Core>
     {
-        [SerializeField] private SecurityOptions securityOptions = new SecurityOptions();
-#if SX_ONLINE
-        [Space]
-        [SerializeField] private OnlineOptions onlineOptions = new OnlineOptions();
-#endif
-
 #if UNITY_EDITOR
-        [Space]
-        [SerializeField] private TestDevices testDevices = new TestDevices();
+        [SerializeField] private TestDevices testDevices = new();
 #endif
-
-        private string baseDeviceId = string.Empty;
-        private string deviceId = string.Empty;
-        private string hashsalt = string.Empty;
-        private byte[] cryptoKey = null;
-
-
-        protected void OnInitialize()
+        protected override void OnInitialize()
         {
 #if UNITY_EDITOR
-            if (testDevices.active)
-                baseDeviceId = deviceId = testDevices.list[testDevices.index];
-            else
+            deviceId = Instance.testDevices.DeviceId;
+            if (string.IsNullOrEmpty(deviceId))
+                deviceId = ComputeMD5(SystemInfo.deviceUniqueIdentifier, Application.identifier);
+#else
+            deviceId = ComputeMD5(SystemInfo.deviceUniqueIdentifier, Application.identifier);
 #endif
-            {
-                baseDeviceId = SystemInfo.deviceUniqueIdentifier;
-                deviceId = ComputeMD5(baseDeviceId, securityOptions.salt);
-            }
-            hashsalt = ComputeMD5(securityOptions.salt, securityOptions.salt);
-            cryptoKey = System.Text.Encoding.ASCII.GetBytes(securityOptions.cryptokey + hashsalt);
 
-#if !UNITY_EDITOR
-            securityOptions.cryptokey = string.Empty;
-            securityOptions.salt = string.Empty;
-            GameName = GetGameName(Application.identifier, Application.productName);
-#endif
+            salt = ComputeMD5(deviceId, Application.identifier);
+            cryptoKey = System.Text.Encoding.ASCII.GetBytes(ComputeMD5(Application.identifier + deviceId, salt) + deviceId + SystemInfo.deviceUniqueIdentifier);
+
+            var versions = Application.version.Split('.');
+            versionMajor = versions[0].ToInt();
+            versionMinor = versions[1].ToInt();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void InitializeOnLoad()
+        {
+            var instance = Instance;
+            Debug.Log($"[Core] initialized version:{instance.version}");
         }
 
         ////////////////////////////////////////////////////////////
         /// STATIC MEMBERS
         ////////////////////////////////////////////////////////////
-        private static Core instance = default;
+        public static string deviceId;
+        public static string salt;
+        public static byte[] cryptoKey;
+        public static int versionMajor;
+        public static int versionMinor;
 
-        public static string Version => "7.1.8";
-        public static string BaseDeviceId => Instance.baseDeviceId;
-        public static string DeviceId => Instance.deviceId;
-        public static string Salt => Instance.hashsalt;
-        public static byte[] CryptoKey => Instance.cryptoKey;
-#if !UNITY_EDITOR
-        public static string GameName { get; private set; }
-#else
-        public static string GameName => GetGameName(Application.identifier, Application.productName);
-#endif
-
-#if SX_ONLINE
-        public static string OnlineDomain => Instance.onlineOptions.onlineDomain;
-        public static string GameId => Instance.onlineOptions.gameId;
-#endif
-
-        public static Core Instance
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (instance == null) CreateMe(CreateInstance<Core>(), typeof(Core).Name);
-#endif
-                if (instance == null)
-                {
-                    instance = Resources.Load<Core>("Configs/" + typeof(Core).Name);
-                    instance.OnInitialize();
-                }
-                return instance;
-            }
-        }
-
-        public static string ComputeMD5(string str, string salt)
+        private static string ComputeMD5(string str, string salt)
         {
             var md5 = System.Security.Cryptography.MD5.Create();
             byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(str + salt);
@@ -96,7 +56,7 @@ namespace SeganX
         {
             var res = new byte[data.Length];
             for (int i = 0; i < data.Length; ++i)
-                res[i] = (byte)(data[i] + CryptoKey[i % CryptoKey.Length]);
+                res[i] = (byte)(data[i] + cryptoKey[i % cryptoKey.Length]);
             return res;
         }
 
@@ -104,55 +64,38 @@ namespace SeganX
         {
             var res = new byte[data.Length];
             for (int i = 0; i < data.Length; ++i)
-                res[i] = (byte)(data[i] - CryptoKey[i % CryptoKey.Length]);
+                res[i] = (byte)(data[i] - cryptoKey[i % cryptoKey.Length]);
             return res;
         }
 
         public static string GetGameName(string identifier, string productName)
         {
             var baseFilename = identifier.Split(new char[] { '.' }, System.StringSplitOptions.RemoveEmptyEntries);
-            return baseFilename.Length > 0 ? baseFilename.Last() : productName.Replace(" ", string.Empty).ToLower();
+            return baseFilename.Length > 0 ? baseFilename[baseFilename.Length - 1] : productName.Replace(" ", string.Empty).ToLower();
         }
-
-#if UNITY_EDITOR
-        private static void CreateMe(Object instance, string name)
-        {
-            var path = "/Resources/Configs/";
-            var appath = Application.dataPath + path;
-            var fileName = path + name + ".asset";
-            if (System.IO.File.Exists(Application.dataPath + fileName)) return;
-            if (!System.IO.Directory.Exists(appath)) System.IO.Directory.CreateDirectory(appath);
-            UnityEditor.AssetDatabase.CreateAsset(instance, "Assets" + fileName);
-            UnityEditor.AssetDatabase.SaveAssets();
-        }
-#endif
 
 
         //////////////////////////////////////////////////////
-        /// HELPER CLASSES
+        /// NESTED MEMBERS
         //////////////////////////////////////////////////////
-        [System.Serializable]
-        public class OnlineOptions
-        {
-            public string gameId = string.Empty;
-            public string onlineDomain = "seganx.com";
-        }
-
-        [System.Serializable]
-        public class SecurityOptions
-        {
-            public string cryptokey = "replace crypto key here";
-            public string salt = "replace salt";
-        }
-
 #if UNITY_EDITOR
         [System.Serializable]
         public class TestDevices
         {
-            public bool active = false;
-            public int index = 0;
-            [Header("List of devices for test"), Space]
-            public string[] list = new string[0];
+            [SerializeField] private int selectedIndex = -1;
+            [SerializeField] private DeviceInfo[] devices = new DeviceInfo[0];
+            public string DeviceId => (selectedIndex >= 0) ? devices[selectedIndex].deviceId : null;
+
+            //////////////////////////////////////////////////////
+            /// NESTED MEMBERS
+            //////////////////////////////////////////////////////
+            [System.Serializable]
+            public class DeviceInfo
+            {
+                [TextArea]
+                public string description;
+                public string deviceId;
+            }
         }
 #endif
 

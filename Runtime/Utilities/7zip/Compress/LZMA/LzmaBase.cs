@@ -1,4 +1,3 @@
-#if SX_ZIP
 namespace SevenZip.Compression.LZMA
 {
     internal abstract class Base
@@ -73,4 +72,3 @@ namespace SevenZip.Compression.LZMA
         public const uint kMatchMaxLen = kMatchMinLen + kNumLenSymbols - 1;
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if SX_ZIP
 namespace SevenZip.Buffer
 {
     public class OutBuffer
@@ -44,4 +43,3 @@ namespace SevenZip.Buffer
         public ulong GetProcessedSize() { return m_ProcessedSize + m_Pos; }
     }
 }
-#endif

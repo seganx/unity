@@ -28,7 +28,7 @@ namespace SeganX
         {
             var safe = new SafeJson();
             safe.data = JsonUtility.ToJson(data);
-            safe.signature = safe.data.ComputeMD5(Core.Salt);
+            safe.signature = safe.data.ComputeMD5(Core.salt);
             return JsonUtility.ToJson(safe, pretty);
         }
 
@@ -38,7 +38,7 @@ namespace SeganX
 
             var safe = JsonUtility.FromJson<SafeJson>(json);
             if (validateSignature)
-                return safe.signature == safe.data.ComputeMD5(Core.Salt) ? JsonUtility.FromJson<T>(safe.data) : default(T);
+                return safe.signature == safe.data.ComputeMD5(Core.salt) ? JsonUtility.FromJson<T>(safe.data) : default(T);
             else
                 return JsonUtility.FromJson<T>(safe.data);
         }

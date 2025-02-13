@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 using System.Collections;
 
@@ -271,4 +270,3 @@ namespace SevenZip.CommandLineParser
         public bool EmptyAllowed = false;
     }
 }
-#endif

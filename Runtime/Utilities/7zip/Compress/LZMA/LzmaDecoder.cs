@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip.Compression.LZMA
@@ -395,4 +394,3 @@ namespace SevenZip.Compression.LZMA
 		*/
     }
 }
-#endif

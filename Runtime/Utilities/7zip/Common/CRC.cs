@@ -1,4 +1,3 @@
-#if SX_ZIP
 namespace SevenZip
 {
     class CRC
@@ -52,4 +51,3 @@ namespace SevenZip
         }
     }
 }
-#endif

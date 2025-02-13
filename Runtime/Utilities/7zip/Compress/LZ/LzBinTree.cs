@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip.Compression.LZ
@@ -364,4 +363,3 @@ namespace SevenZip.Compression.LZ
         public void SetCutValue(UInt32 cutValue) { _cutValue = cutValue; }
     }
 }
-#endif

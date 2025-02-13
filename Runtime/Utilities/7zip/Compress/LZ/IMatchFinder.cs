@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip.Compression.LZ
@@ -21,4 +20,3 @@ namespace SevenZip.Compression.LZ
         void Skip(UInt32 num);
     }
 }
-#endif

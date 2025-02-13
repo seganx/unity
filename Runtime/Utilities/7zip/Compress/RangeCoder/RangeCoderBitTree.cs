@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip.Compression.RangeCoder
@@ -156,4 +155,3 @@ namespace SevenZip.Compression.RangeCoder
         }
     }
 }
-#endif

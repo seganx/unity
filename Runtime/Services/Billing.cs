@@ -31,9 +31,9 @@ namespace SeganX.Services
 
         }
 
-        public static void EndPurchase(string tokenOrTransactionId, int price, Action<bool> callback)
+        public static void FinishPurchase(string sku, int price, string token, Action<bool> callback)
         {
-            billing?.Consume(tokenOrTransactionId, price, succeed => callback?.SafeInvoke(succeed));
+            billing?.FinishPurchase(sku, price, token, succeed => callback?.SafeInvoke(succeed));
 
         }
 
@@ -42,7 +42,6 @@ namespace SeganX.Services
             billing?.GetSkuDetails(skus, list => callback?.SafeInvoke(list));
 
         }
-
 
         public static void GetPurchases(Action<bool, List<PurchaseData>> callback)
         {

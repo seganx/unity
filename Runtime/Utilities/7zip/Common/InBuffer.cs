@@ -1,4 +1,3 @@
-#if SX_ZIP
 namespace SevenZip.Buffer
 {
     public class InBuffer
@@ -69,4 +68,3 @@ namespace SevenZip.Buffer
         }
     }
 }
-#endif

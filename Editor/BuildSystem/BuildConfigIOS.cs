@@ -21,8 +21,14 @@ namespace SeganX.Builder
         public List<FileInfo> files = new List<FileInfo>();
 
 
-
-        public override string FileName => $"{Core.GameName}_{Builder.Instance.version}.{BundleVersion}_iOS{postfix}";
+        public override string FileName
+        {
+            get
+            {
+                var currentGameName = Core.GetGameName(packageName.HasContent(3) ? packageName : Application.identifier, productName.HasContent(3) ? productName : Application.productName);
+                return $"{currentGameName}_{Builder.Instance.version}.{BundleVersion}_iOS_{postfix}";
+            }
+        }
 
         public override string GetError()
         {

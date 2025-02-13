@@ -1,4 +1,3 @@
-#if SX_ZIP
 using System;
 
 namespace SevenZip
@@ -154,4 +153,3 @@ namespace SevenZip
         void SetDecoderProperties(byte[] properties);
     }
 }
-#endif

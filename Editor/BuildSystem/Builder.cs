@@ -59,21 +59,11 @@ namespace SeganX.Builder
         [System.Serializable]
         public class Symbols
         {
-            public bool cameraFX = false;
-            public bool onlineSystem = false;
-            public bool purchaseSystem = false;
-            public bool zipCompression = false;
-            public bool playServices = false;
             public List<string> additionals = new List<string>();
 
             public string Get()
             {
                 var result = new List<string>(8);
-                if (cameraFX) result.Add("SX_CAMFX");
-                if (onlineSystem) result.Add("SX_ONLINE");
-                if (purchaseSystem) result.Add("SX_IAP");
-                if (zipCompression) result.Add("SX_ZIP");
-                if (playServices) result.Add("PLAY_SERVICES");
                 result.AddRange(additionals);
                 return string.Join(";", result);
             }
