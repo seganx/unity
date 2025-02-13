@@ -13,5 +13,6 @@
         public static void Purchased(string currency, int amount, string itemType, string itemId, string cartType) => analytics?.Purchased(currency, amount, itemType, itemId, cartType);
         public static void GameAnalyticsEvent(string eventId, float value) => analytics?.GameAnalyticsEvent(eventId, value);
         public static string GetRemoteConfig(string key, string defaultValue) => analytics != null ? analytics.GetRemoteConfig(key, defaultValue) : defaultValue;
+        public static string GetAbTestVariantId(string defaultValue) => analytics != null ? analytics.GetAbTestVariantId(defaultValue) : defaultValue;
     }
 }

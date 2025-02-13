@@ -22,6 +22,7 @@ namespace SeganX.Services
         void Purchased(string currency, int amount, string itemType, string itemId, string cartType);
         void GameAnalyticsEvent(string eventId, float value);
         string GetRemoteConfig(string key, string defaultValue);
+        string GetAbTestVariantId(string defaultValue);
     }
 
     public interface ILocalPush
@@ -47,7 +48,7 @@ namespace SeganX.Services
         public string token;
         public string payload;
 
-        override public string ToString() => $"sku: {sku}, token: {token}, payload: {payload}";
+        override public string ToString() => $"sku:{sku}, price:{price}, token:{token}, payload:{payload}";
     }
 
     public class SkuDetails
@@ -59,6 +60,6 @@ namespace SeganX.Services
         public string priceCurrency;
         public float priceAmount;
 
-        override public string ToString() => $"sku: {sku}, title: {title}, price: {priceFormatted}, description: {description}";
+        override public string ToString() => $"sku:{sku}, title:{title}, priceAmount:{priceAmount}, priceFormatted:{priceFormatted}, priceCurrency:{priceCurrency}, description:{description}";
     }
 }
