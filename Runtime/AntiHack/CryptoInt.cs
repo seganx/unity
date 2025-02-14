@@ -9,7 +9,7 @@ namespace SeganX
         public int v;
         public int c;
 
-        public readonly IntResult Result => Decrypt(k, v);
+        public readonly IntResult Result => Decrypt(v, k, c);
 
         public void Encrypt(int value)
         {
