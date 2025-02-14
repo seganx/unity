@@ -168,7 +168,8 @@ namespace SeganX
 
         public static void Delete(string key)
         {
-            var path = Application.persistentDataPath + "/" + key + ".seganx";
+            var filename = EncryptName(key) + ".seganx";
+            var path = Application.persistentDataPath + "/" + filename;
             if (File.Exists(path))
                 File.Delete(path);
             else

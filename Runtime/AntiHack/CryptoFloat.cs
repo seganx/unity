@@ -10,16 +10,7 @@ namespace SeganX
         public int v;
         public int c;
 
-        public FloatResult Get
-        {
-            get
-            {
-                FloatIntBytesUnion res;
-                res.f = 0;
-                res.i = (v ^ k) + k;
-                return FloatResult.Set(res.i == c ? res.f : 0);
-            }
-        }
+        public readonly FloatResult Result => Decrypt(v, k, c);
 
         public void Encrypt(float value)
         {
@@ -49,19 +40,34 @@ namespace SeganX
 
         public override string ToString()
         {
-            return Get.value.ToString();
+            return Result.value.ToString();
         }
 
 
         //////////////////////////////////////////////////////
         /// STATIC MEMBERS
         //////////////////////////////////////////////////////
-        // TDOO: revew by sajad, int value? or float value?
         public static implicit operator CryptoFloat(float value)
         {
             var result = new CryptoFloat();
             result.Encrypt(value);
             return result;
+        }
+
+        public static FloatResult Decrypt(int v, int k)
+        {
+            FloatIntBytesUnion res;
+            res.f = 0;
+            res.i = (v ^ k) + k;
+            return FloatResult.Set(res.f);
+        }
+
+        public static FloatResult Decrypt(int v, int k, int c)
+        {
+            FloatIntBytesUnion res;
+            res.f = 0;
+            res.i = (v ^ k) + k;
+            return FloatResult.Set(res.i == c ? res.f : 0);
         }
 
         //////////////////////////////////////////////////////

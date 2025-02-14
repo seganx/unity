@@ -7,6 +7,7 @@ namespace SeganX
     [DefaultExecutionOrder(1000)]
     public static class Loader
     {
+        public static string Caption { get; set; }
         public static event System.Action OnLoadCompleted = null;
         private static readonly List<OrderedAction> actions = new List<OrderedAction>();
 
@@ -19,6 +20,8 @@ namespace SeganX
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static async void OnRuntimeInitialize()
         {
+            await TaskEx.Yield();
+            await TaskEx.Yield();
             actions.Sort((x, y) => x.order - y.order);
             foreach (var item in actions)
             {
@@ -53,6 +56,25 @@ namespace SeganX
                 }
             }
         }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void OnRuntimeInitializeFirst()
+        {
+            Caption = string.Empty;
+#if UNITY_EDITOR
+            Application.quitting += OnApplicationQuit;
+#endif
+        }
+
+#if UNITY_EDITOR
+        private static void OnApplicationQuit()
+        {
+            Application.quitting -= OnApplicationQuit;
+            var constructor = System.Threading.SynchronizationContext.Current.GetType().GetConstructor(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new System.Type[] { typeof(int) }, null);
+            var newContext = constructor.Invoke(new object[] { System.Threading.Thread.CurrentThread.ManagedThreadId });
+            System.Threading.SynchronizationContext.SetSynchronizationContext(newContext as System.Threading.SynchronizationContext);
+        }
+#endif
 
         //////////////////////////////////////////////////////
         /// HELPER MEMBERS

@@ -4,35 +4,18 @@ namespace SeganX
 {
     public abstract class StaticConfig<T> : StaticConfig<T, T> where T : StaticConfig<T, T> { }
 
-    public abstract class StaticConfig<T, FIELNAME> : StaticConfigBase where T : StaticConfig<T, FIELNAME>
+    public abstract class StaticConfig<T, FIELNAME> : StaticConfigBase<T, FIELNAME> where T : StaticConfig<T, FIELNAME>
     {
-        private static T instance = default;
-
-        public static T Instance
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (instance == null) CreateMe(CreateInstance<T>(), typeof(FIELNAME).Name);
-#endif
-                if (instance == null)
-                {
-                    instance = Resources.Load<T>("Configs/" + typeof(FIELNAME).Name);
-                    instance.OnInitialize();
-                }
-                return instance;
-            }
-        }
-
+        public int version = 1;
 
         protected static void SaveData<D>(D data)
         {
-            PlayerPrefsEx.SetObject(Instance.name + instance.version, data);
+            PlayerPrefsEx.SetObject(Instance.name + Instance.version, data);
         }
 
         protected static D LoadData<D>(D defauleObj)
         {
-            return PlayerPrefsEx.GetObject(Instance.name + instance.version, defauleObj);
+            return PlayerPrefsEx.GetObject(Instance.name + Instance.version, defauleObj);
         }
 
 #if UNITY_EDITOR

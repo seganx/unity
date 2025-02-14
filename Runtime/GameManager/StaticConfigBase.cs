@@ -2,17 +2,32 @@
 
 namespace SeganX
 {
-    public abstract class StaticConfigBase : ScriptableObject
+    public abstract class StaticConfigBase<T, FILENAME> : ScriptableObject where T : StaticConfigBase<T, FILENAME>
     {
-        public int version = 1;
-
         protected virtual void OnInitialize() { }
-
 
 
         //////////////////////////////////////////////////////
         /// STATIC MEMBERS
         //////////////////////////////////////////////////////
+        private static T instance = default;
+
+        public static T Instance
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (instance == null) CreateMe(CreateInstance<T>(), typeof(FILENAME).Name);
+#endif
+                if (instance == null)
+                {
+                    instance = Resources.Load<T>("Configs/" + typeof(FILENAME).Name);
+                    instance.OnInitialize();
+                }
+                return instance;
+            }
+        }
+
 #if UNITY_EDITOR
         protected static void CreateMe(Object instance, string name)
         {

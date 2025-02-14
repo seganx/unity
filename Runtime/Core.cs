@@ -2,7 +2,7 @@
 
 namespace SeganX
 {
-    public class Core : StaticConfig<Core>
+    public class Core : StaticConfigBase<Core, Core>
     {
 #if UNITY_EDITOR
         [SerializeField] private TestDevices testDevices = new();
@@ -14,11 +14,13 @@ namespace SeganX
             if (string.IsNullOrEmpty(deviceId))
                 deviceId = ComputeMD5(SystemInfo.deviceUniqueIdentifier, Application.identifier);
 #else
+            gameName = GetGameName(Application.identifier, Application.productName);
             deviceId = ComputeMD5(SystemInfo.deviceUniqueIdentifier, Application.identifier);
 #endif
 
             salt = ComputeMD5(deviceId, Application.identifier);
             cryptoKey = System.Text.Encoding.ASCII.GetBytes(ComputeMD5(Application.identifier + deviceId, salt) + deviceId + SystemInfo.deviceUniqueIdentifier);
+
 
             var versions = Application.version.Split('.');
             versionMajor = versions[0].ToInt();
@@ -28,8 +30,10 @@ namespace SeganX
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void InitializeOnLoad()
         {
-            var instance = Instance;
-            Debug.Log($"[Core] initialized version:{instance.version}");
+#if !UNITY_EDITOR
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+#endif
+            Debug.Log($"[{Instance.name}] Initialized version:7.2.1");
         }
 
         ////////////////////////////////////////////////////////////
@@ -41,8 +45,18 @@ namespace SeganX
         public static int versionMajor;
         public static int versionMinor;
 
+#if !UNITY_EDITOR
+        public static string gameName;
+#else
+        public static string gameName => GetGameName(Application.identifier, Application.productName);
+#endif
+
+#if SX_ONLINE
+        public static string OnlineDomain => "http://seganx.ir/games/carsparty-v2/";
+        public static string GameId => "4N7C26Hk2@Fs";
+#endif
         private static string ComputeMD5(string str, string salt)
-        {
+        { 
             var md5 = System.Security.Cryptography.MD5.Create();
             byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(str + salt);
             byte[] hashBytes = md5.ComputeHash(inputBytes);
@@ -71,7 +85,7 @@ namespace SeganX
         public static string GetGameName(string identifier, string productName)
         {
             var baseFilename = identifier.Split(new char[] { '.' }, System.StringSplitOptions.RemoveEmptyEntries);
-            return baseFilename.Length > 0 ? baseFilename[baseFilename.Length - 1] : productName.Replace(" ", string.Empty).ToLower();
+            return baseFilename.Length > 0 ? baseFilename[^1] : Application.productName.Replace(" ", string.Empty).ToLower();
         }
 
 

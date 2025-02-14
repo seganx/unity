@@ -9,14 +9,7 @@ namespace SeganX
         public int v;
         public int c;
 
-        public IntResult Get
-        {
-            get
-            {
-                var res = (v ^ k) + k;
-                return IntResult.Set(res == c ? res : 0);
-            }
-        }
+        public readonly IntResult Result => Decrypt(k, v);
 
         public void Encrypt(int value)
         {
@@ -26,7 +19,7 @@ namespace SeganX
             c = value;
         }
 
-        public void Save(BufferWriter buffer)
+        public readonly void Save(BufferWriter buffer)
         {
             buffer.Int(k);
             buffer.Int(v);
@@ -40,9 +33,9 @@ namespace SeganX
             c = buffer.Int();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return Get.value.ToString();
+            return Result.value.ToString();
         }
 
         //////////////////////////////////////////////////////
@@ -53,6 +46,18 @@ namespace SeganX
             var result = new CryptoInt();
             result.Encrypt(value);
             return result;
+        }
+
+        public static IntResult Decrypt(int v, int k)
+        {
+            var res = (v ^ k) + k;
+            return IntResult.Set(res);
+        }
+
+        public static IntResult Decrypt(int v, int k, int c)
+        {
+            var res = (v ^ k) + k;
+            return IntResult.Set(res == c ? res : 0);
         }
     }
 }
