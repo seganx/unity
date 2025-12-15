@@ -54,10 +54,12 @@ namespace SeganX
 
             private void OnGUI()
             {
+                if (settings.disabled) return;
+
                 EnsureStyles();
                 var uiScale = Mathf.Lerp(Screen.width / ScreenBaseSize, Screen.height / ScreenBaseSize, 0.5f);
 
-                if (!IsVisible)
+                if (!visible)
                 {
                     HandleFloatingButtonInput();
                     Styles.floatingButton.fontSize = Mathf.RoundToInt(14 * uiScale);
@@ -91,7 +93,7 @@ namespace SeganX
             public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
             {
                 if (!settings.blockTouch) return;
-                if (!IsVisible && !FloatingButton.rect.Contains(new Vector2(eventData.position.x, Screen.height - eventData.position.y)))
+                if (!visible && !FloatingButton.rect.Contains(new Vector2(eventData.position.x, Screen.height - eventData.position.y)))
                     return;
                 resultAppendList.Add(raycastResult);
                 eventData.pointerClick = gameObject;
@@ -103,18 +105,24 @@ namespace SeganX
         ///////////////////////////////////////////////////////////////////
         //// STATIC MEMBERS
         ///////////////////////////////////////////////////////////////////
-        public static bool IsVisible { get; set; }
         public static event Action<string> OnCommandEntered;
 
         private static readonly List<LogEntry> logEntries = new(512);
         private static readonly List<Log> logs = new(512);
         private static string commandInput = string.Empty;
         private static Settings settings = new();
+        private static bool visible;
         private static string filter;
         private static int infoCount;
         private static int warnCount;
         private static int errorCount;
         private static float scrollPosition;
+
+        public static bool Disabled
+        {
+            get => settings.disabled;
+            set => settings.disabled = value;
+        }
 
 #if STAGING_BUILD || UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
@@ -122,14 +130,16 @@ namespace SeganX
         {
             Application.logMessageReceivedThreaded += (condition, trace, type) =>
             {
+                if (settings.disabled) return;
+
                 lock (logEntries)
                 {
                     logEntries.Add(new LogEntry() { condition = condition, trace = trace, type = type });
                 }
             };
 
-            Debug.Log($"<color=green>Started at {DateTime.Now} on device {SystemInfo.deviceUniqueIdentifier}</color>");
             Load();
+            Debug.Log($"<color=green>Started at {DateTime.Now} on device {SystemInfo.deviceUniqueIdentifier}</color>");
             var instance = new GameObject(nameof(Console)).AddComponent<Mono>();
             UnityEngine.Object.DontDestroyOnLoad(instance);
         }
@@ -204,7 +214,7 @@ namespace SeganX
             GUILayout.BeginHorizontal(GUILayout.Height(height));
             {
                 if (GUILayout.Button("X", GUILayout.Width(height)))
-                    IsVisible = false;
+                    visible = false;
 
                 GUILayout.Label($"FPS: {FpsCounter.fps:0.}", Styles.header);
 
@@ -406,7 +416,7 @@ namespace SeganX
             else if (e.type == EventType.MouseUp && FloatingButton.pointerDown)
             {
                 if (!FloatingButton.isDragging && FloatingButton.rect.Contains(e.mousePosition))
-                    IsVisible = true;
+                    visible = true;
                 FloatingButton.pointerDown = false;
                 FloatingButton.isDragging = false;
                 e.Use();
@@ -417,13 +427,13 @@ namespace SeganX
         {
             settings.floatingButtonPosition = FloatingButton.rect.position;
             var json = JsonUtility.ToJson(settings);
-            PlayerPrefs.SetString("TinyConsole.Settings", json);
+            PlayerPrefs.SetString("Console.Settings", json);
             PlayerPrefs.Save();
         }
 
         private static void Load()
         {
-            var json = PlayerPrefs.GetString("TinyConsole.Settings", string.Empty);
+            var json = PlayerPrefs.GetString("Console.Settings", string.Empty);
             if (json == string.Empty) return;
             try
             {
@@ -442,6 +452,7 @@ namespace SeganX
         [Serializable]
         private class Settings
         {
+            public bool disabled = true;
             public Vector2 floatingButtonPosition;
             public Color backgroundColorBlocker = new Color(0f, 0f, 0f, 0.8f);
             public Color backgroundColor = new Color(0f, 0f, 0f, 0.5f);
